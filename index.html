@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Five Nights at Freddy's 3 - Full 3D</title>
+    <title>Five Nights at Freddy's 3 - Improved</title>
     <style>
         * {
             margin: 0;
@@ -33,7 +33,7 @@
         #hud {
             position: fixed;
             top: 20px;
-            left: 20px;
+            right: 20px;
             z-index: 100;
             background: rgba(0, 0, 0, 0.8);
             padding: 15px;
@@ -43,7 +43,7 @@
         }
         
         #time {
-            font-size: 24px;
+            font-size: 28px;
             margin-bottom: 10px;
             color: #fff;
             text-shadow: 0 0 10px #0f0;
@@ -73,90 +73,63 @@
             box-shadow: 0 0 10px #f00;
         }
         
-        .panel {
+        #camera-button, #maintenance-button {
             position: fixed;
-            background: rgba(0, 0, 0, 0.95);
-            border: 2px solid #0f0;
-            padding: 20px;
-            display: none;
-            z-index: 150;
-        }
-        
-        .panel.active {
-            display: block;
-        }
-        
-        .panel-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
+            bottom: 30px;
+            background: rgba(0, 0, 0, 0.85);
+            border: 3px solid #0f0;
             color: #0f0;
-        }
-        
-        .close-btn {
-            background: #f00;
-            border: 2px solid #f00;
-            color: #fff;
-            padding: 5px 15px;
+            padding: 20px 35px;
             cursor: pointer;
             font-family: 'Courier New', monospace;
+            font-size: 18px;
             font-weight: bold;
-        }
-        
-        .close-btn:hover {
-            background: #fff;
-            color: #f00;
-        }
-        
-        #camera-panel {
-            bottom: 20px;
-            right: 20px;
-            max-width: 400px;
-        }
-        
-        .camera-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-        }
-        
-        .camera-button {
-            background: #1a1a2e;
-            border: 2px solid #0f0;
-            color: #0f0;
-            padding: 10px;
-            cursor: pointer;
+            z-index: 100;
             transition: all 0.2s;
-            font-family: 'Courier New', monospace;
         }
         
-        .camera-button:hover {
-            background: #0f0;
-            color: #000;
-            box-shadow: 0 0 15px #0f0;
+        #camera-button {
+            right: 30px;
         }
         
-        .camera-button.active {
+        #maintenance-button {
+            left: 30px;
+            border-color: #f90;
+            color: #f90;
+        }
+        
+        #camera-button:hover {
             background: #0f0;
             color: #000;
+            box-shadow: 0 0 20px #0f0;
+        }
+        
+        #maintenance-button:hover {
+            background: #f90;
+            color: #000;
+            box-shadow: 0 0 20px #f90;
+        }
+        
+        /* CAMERA SYSTEM */
+        #camera-system {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: none;
+            z-index: 500;
+        }
+        
+        #camera-system.active {
+            display: block;
         }
         
         #camera-view {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 80%;
-            height: 80%;
-            background: #000;
-            border: 3px solid #0f0;
-            display: none;
-            z-index: 200;
-        }
-        
-        #camera-view.active {
-            display: block;
+            width: 100%;
+            height: 100%;
+            position: relative;
         }
         
         #camera-canvas {
@@ -165,104 +138,183 @@
             display: block;
         }
         
-        .camera-label {
+        .camera-hud {
             position: absolute;
-            top: 10px;
-            left: 10px;
-            font-size: 18px;
-            color: #0f0;
-            text-shadow: 0 0 10px #0f0;
-            z-index: 201;
-        }
-        
-        #maintenance-panel {
-            bottom: 20px;
+            top: 20px;
             left: 20px;
-            border-color: #f90;
+            font-size: 24px;
+            color: #0f0;
+            text-shadow: 0 0 15px #0f0;
+            z-index: 501;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 20px;
+            border: 2px solid #0f0;
         }
         
-        #maintenance-panel .panel-header {
-            color: #f90;
+        #camera-map {
+            position: absolute;
+            bottom: 80px;
+            right: 30px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 3px solid #0f0;
+            padding: 20px;
+            z-index: 501;
         }
         
-        .maintenance-button {
+        .camera-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+        
+        .camera-btn {
             background: #1a1a2e;
-            border: 2px solid #f90;
-            color: #f90;
-            padding: 10px 15px;
-            margin: 5px;
+            border: 2px solid #0f0;
+            color: #0f0;
+            padding: 12px;
             cursor: pointer;
             font-family: 'Courier New', monospace;
-            display: block;
-            width: 100%;
+            font-size: 14px;
+            transition: all 0.2s;
         }
         
-        .maintenance-button:hover:not(:disabled) {
-            background: #f90;
+        .camera-btn:hover {
+            background: #0f0;
             color: #000;
         }
         
-        .maintenance-button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
+        .camera-btn.active {
+            background: #0f0;
+            color: #000;
+            box-shadow: 0 0 15px #0f0;
         }
         
-        #audio-panel {
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            border-color: #0ff;
-        }
-        
-        #audio-panel .panel-header {
-            color: #0ff;
-        }
-        
-        .audio-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-        }
-        
-        .audio-button {
+        #audio-lure-btn {
+            margin-top: 10px;
+            width: 100%;
             background: #1a1a2e;
             border: 2px solid #0ff;
             color: #0ff;
-            padding: 15px;
+            padding: 12px;
             cursor: pointer;
             font-family: 'Courier New', monospace;
+            font-size: 14px;
         }
         
-        .audio-button:hover {
+        #audio-lure-btn:hover:not(:disabled) {
             background: #0ff;
             color: #000;
         }
         
-        #toggle-buttons {
-            position: fixed;
+        #audio-lure-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        
+        #close-camera {
+            position: absolute;
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            display: flex;
-            gap: 20px;
-            z-index: 100;
+            background: rgba(0, 0, 0, 0.9);
+            border: 3px solid #f00;
+            color: #f00;
+            padding: 15px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            z-index: 501;
         }
         
-        .toggle-btn {
-            background: rgba(0, 0, 0, 0.8);
-            border: 2px solid #0f0;
-            color: #0f0;
-            padding: 15px 30px;
+        #close-camera:hover {
+            background: #f00;
+            color: #000;
+        }
+        
+        /* MAINTENANCE PANEL */
+        #maintenance-panel {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 40%;
+            background: rgba(0, 0, 0, 0.95);
+            border-top: 4px solid #f90;
+            display: none;
+            z-index: 500;
+            padding: 30px;
+        }
+        
+        #maintenance-panel.active {
+            display: block;
+        }
+        
+        .maintenance-header {
+            color: #f90;
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .maintenance-controls {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .system-control {
+            text-align: center;
+            flex: 1;
+            padding: 0 20px;
+        }
+        
+        .system-name {
+            color: #f90;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        
+        .reboot-btn {
+            background: #1a1a2e;
+            border: 3px solid #f90;
+            color: #f90;
+            padding: 15px 25px;
             cursor: pointer;
             font-family: 'Courier New', monospace;
             font-size: 16px;
+            width: 100%;
             transition: all 0.2s;
         }
         
-        .toggle-btn:hover {
-            background: #0f0;
+        .reboot-btn:hover:not(:disabled) {
+            background: #f90;
             color: #000;
-            box-shadow: 0 0 20px #0f0;
+        }
+        
+        .reboot-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        #close-maintenance {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            background: #f00;
+            border: 2px solid #f00;
+            color: #fff;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
+        
+        #close-maintenance:hover {
+            background: #fff;
+            color: #f00;
         }
         
         .static-overlay {
@@ -350,16 +402,6 @@
             background: #0f0;
             color: #000;
         }
-        
-        .springtrap-warning {
-            color: #f00;
-            animation: blink 0.5s infinite;
-        }
-        
-        @keyframes blink {
-            0%, 50% { opacity: 1; }
-            51%, 100% { opacity: 0; }
-        }
     </style>
 </head>
 <body>
@@ -382,67 +424,58 @@
             </div>
             <div style="margin-top: 10px;">
                 <div>SPRINGTRAP: <span id="springtrap-location">CAM 01</span></div>
+                <div style="font-size: 12px; margin-top: 5px;">Audio Uses: <span id="audio-uses">∞</span></div>
             </div>
         </div>
         
-        <div id="camera-panel" class="panel">
-            <div class="panel-header">
-                <h3>CAMERA SYSTEM</h3>
-                <button class="close-btn" onclick="closePanel('camera')">✕ CLOSE</button>
-            </div>
-            <div class="camera-grid">
-                <button class="camera-button" data-cam="CAM_01">CAM 01</button>
-                <button class="camera-button" data-cam="CAM_02">CAM 02</button>
-                <button class="camera-button" data-cam="CAM_03">CAM 03</button>
-                <button class="camera-button" data-cam="CAM_04">CAM 04</button>
-                <button class="camera-button" data-cam="CAM_05">CAM 05</button>
-                <button class="camera-button" data-cam="CAM_06">CAM 06</button>
-                <button class="camera-button" data-cam="CAM_07">CAM 07</button>
-                <button class="camera-button" data-cam="CAM_08">CAM 08</button>
-                <button class="camera-button" data-cam="CAM_09">CAM 09</button>
+        <button id="camera-button">CAMERA SYSTEM</button>
+        <button id="maintenance-button">MAINTENANCE PANEL</button>
+        
+        <!-- CAMERA SYSTEM -->
+        <div id="camera-system">
+            <div id="camera-view">
+                <canvas id="camera-canvas"></canvas>
+                <div class="camera-hud" id="camera-label">CAM 01</div>
+                <div id="camera-map">
+                    <div class="camera-grid">
+                        <button class="camera-btn" data-cam="CAM_01">01</button>
+                        <button class="camera-btn" data-cam="CAM_02">02</button>
+                        <button class="camera-btn" data-cam="CAM_03">03</button>
+                        <button class="camera-btn" data-cam="CAM_04">04</button>
+                        <button class="camera-btn" data-cam="CAM_05">05</button>
+                        <button class="camera-btn" data-cam="CAM_06">06</button>
+                        <button class="camera-btn" data-cam="CAM_07">07</button>
+                        <button class="camera-btn" data-cam="CAM_08">08</button>
+                        <button class="camera-btn" data-cam="CAM_09">09</button>
+                    </div>
+                    <button id="audio-lure-btn">PLAY AUDIO LURE</button>
+                </div>
+                <button id="close-camera">✕ CLOSE CAMERAS</button>
             </div>
         </div>
         
-        <div id="maintenance-panel" class="panel">
-            <div class="panel-header">
-                <h3>MAINTENANCE</h3>
-                <button class="close-btn" onclick="closePanel('maintenance')">✕ CLOSE</button>
+        <!-- MAINTENANCE PANEL -->
+        <div id="maintenance-panel">
+            <button id="close-maintenance">✕ CLOSE</button>
+            <div class="maintenance-header">MAINTENANCE PANEL</div>
+            <div class="maintenance-controls">
+                <div class="system-control">
+                    <div class="system-name">VENTILATION</div>
+                    <button class="reboot-btn" id="reboot-vent">REBOOT<br>(5 sec)</button>
+                </div>
+                <div class="system-control">
+                    <div class="system-name">CAMERA SYSTEM</div>
+                    <button class="reboot-btn" id="reboot-camera">REBOOT<br>(5 sec)</button>
+                </div>
+                <div class="system-control">
+                    <div class="system-name">AUDIO DEVICES</div>
+                    <button class="reboot-btn" id="reboot-audio">REBOOT<br>(5 sec)</button>
+                </div>
+                <div class="system-control">
+                    <div class="system-name">ALL SYSTEMS</div>
+                    <button class="reboot-btn" id="reboot-all">REBOOT ALL<br>(12 sec)</button>
+                </div>
             </div>
-            <p style="font-size: 12px; margin-bottom: 10px; color: #f90;">Only one system can reboot at a time (3 seconds)</p>
-            <button class="maintenance-button" id="reboot-vent">REBOOT VENTILATION</button>
-            <button class="maintenance-button" id="reboot-camera">REBOOT CAMERA</button>
-            <button class="maintenance-button" id="reboot-audio">REBOOT AUDIO</button>
-        </div>
-        
-        <div id="audio-panel" class="panel">
-            <div class="panel-header">
-                <h3>AUDIO LURE SYSTEM</h3>
-                <button class="close-btn" onclick="closePanel('audio')">✕ CLOSE</button>
-            </div>
-            <p style="font-size: 12px; margin-bottom: 10px; color: #0ff;">Play BB's voice to lure Springtrap</p>
-            <div class="audio-grid">
-                <button class="audio-button" data-cam="CAM_01">CAM 01</button>
-                <button class="audio-button" data-cam="CAM_02">CAM 02</button>
-                <button class="audio-button" data-cam="CAM_03">CAM 03</button>
-                <button class="audio-button" data-cam="CAM_04">CAM 04</button>
-                <button class="audio-button" data-cam="CAM_05">CAM 05</button>
-                <button class="audio-button" data-cam="CAM_06">CAM 06</button>
-                <button class="audio-button" data-cam="CAM_07">CAM 07</button>
-                <button class="audio-button" data-cam="CAM_08">CAM 08</button>
-                <button class="audio-button" data-cam="CAM_09">CAM 09</button>
-            </div>
-        </div>
-        
-        <div id="camera-view">
-            <div class="camera-label" id="current-cam-label">CAM 01</div>
-            <canvas id="camera-canvas"></canvas>
-            <button class="close-btn" style="position: absolute; top: 10px; right: 10px; z-index: 202;" onclick="closeCameraView()">✕ CLOSE</button>
-        </div>
-        
-        <div id="toggle-buttons">
-            <button class="toggle-btn" onclick="togglePanel('camera')">CAMERAS</button>
-            <button class="toggle-btn" onclick="togglePanel('maintenance')">MAINTENANCE</button>
-            <button class="toggle-btn" onclick="togglePanel('audio')">AUDIO</button>
         </div>
         
         <div id="jumpscare">
@@ -469,6 +502,7 @@
         // Game State
         const gameState = {
             time: 0,
+            night: 1,
             ventilation: true,
             camera: true,
             audio: true,
@@ -476,13 +510,17 @@
             currentCamera: 'CAM_01',
             cameraOpen: false,
             maintenanceOpen: false,
-            audioOpen: false,
             rebooting: null,
             gameOver: false,
             won: false,
-            ventFailTimer: 0,
-            springtrapMoveTimer: 0
+            springtrapMoveTimer: 0,
+            audioUsesRemaining: Infinity,
+            audioUsesBeforeError: Infinity,
+            cameraUseTime: 0
         };
+        
+        // Audio uses per night (authentic FNAF 3)
+        const audioLimits = [Infinity, Infinity, 10, 4, 3, 2, 2];
         
         // Camera map
         const cameraMap = {
@@ -534,19 +572,16 @@
             roughness: 0.9
         });
         
-        // Back wall
         const backWall = new THREE.Mesh(new THREE.BoxGeometry(20, 5, 0.2), wallMaterial);
         backWall.position.set(0, 2.5, -10);
         backWall.receiveShadow = true;
         officeScene.add(backWall);
         
-        // Left wall
         const leftWall = new THREE.Mesh(new THREE.BoxGeometry(0.2, 5, 20), wallMaterial);
         leftWall.position.set(-10, 2.5, 0);
         leftWall.receiveShadow = true;
         officeScene.add(leftWall);
         
-        // Right wall
         const rightWall = new THREE.Mesh(new THREE.BoxGeometry(0.2, 5, 20), wallMaterial);
         rightWall.position.set(10, 2.5, 0);
         rightWall.receiveShadow = true;
@@ -573,7 +608,7 @@
             }
         }
         
-        // Monitor on desk
+        // Monitor
         const monitorBase = new THREE.Mesh(
             new THREE.BoxGeometry(0.8, 0.8, 0.3),
             new THREE.MeshStandardMaterial({ color: 0x1a1a2e })
@@ -582,7 +617,6 @@
         monitorBase.castShadow = true;
         officeScene.add(monitorBase);
         
-        // Monitor screen
         const screenMaterial = new THREE.MeshBasicMaterial({ color: 0x003300 });
         const screen = new THREE.Mesh(
             new THREE.PlaneGeometry(0.7, 0.5),
@@ -591,7 +625,7 @@
         screen.position.set(0, 1.6, 2.16);
         officeScene.add(screen);
         
-        // Left door frame
+        // Door frames
         const doorFrameLeft = new THREE.Mesh(
             new THREE.BoxGeometry(2, 4, 0.3),
             new THREE.MeshStandardMaterial({ color: 0x2a2a2a })
@@ -599,7 +633,6 @@
         doorFrameLeft.position.set(-6, 2, -9.9);
         officeScene.add(doorFrameLeft);
         
-        // Right door frame
         const doorFrameRight = new THREE.Mesh(
             new THREE.BoxGeometry(2, 4, 0.3),
             new THREE.MeshStandardMaterial({ color: 0x2a2a2a })
@@ -607,38 +640,23 @@
         doorFrameRight.position.set(6, 2, -9.9);
         officeScene.add(doorFrameRight);
         
-        // Vent grilles
-        const ventMaterial = new THREE.MeshStandardMaterial({ color: 0x0a0a0a });
-        const leftVent = new THREE.Mesh(new THREE.BoxGeometry(1, 0.8, 0.1), ventMaterial);
-        leftVent.position.set(-7, 1.5, -9.85);
-        officeScene.add(leftVent);
-        
-        const rightVent = new THREE.Mesh(new THREE.BoxGeometry(1, 0.8, 0.1), ventMaterial);
-        rightVent.position.set(7, 1.5, -9.85);
-        officeScene.add(rightVent);
-        
-        // Camera position
         officeCamera.position.set(0, 1.6, 5);
         
         // ========== SPRINGTRAP MODEL ==========
         function createSpringtrap() {
             const springtrap = new THREE.Group();
             
-            // Body
-            const bodyGeometry = new THREE.BoxGeometry(1, 1.5, 0.6);
             const bodyMaterial = new THREE.MeshStandardMaterial({ color: 0x4a6e2e });
-            const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+            
+            const body = new THREE.Mesh(new THREE.BoxGeometry(1, 1.5, 0.6), bodyMaterial);
             body.castShadow = true;
             springtrap.add(body);
             
-            // Head
-            const headGeometry = new THREE.BoxGeometry(0.8, 0.8, 0.7);
-            const head = new THREE.Mesh(headGeometry, bodyMaterial);
+            const head = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.8, 0.7), bodyMaterial);
             head.position.y = 1.15;
             head.castShadow = true;
             springtrap.add(head);
             
-            // Ears
             const earGeometry = new THREE.BoxGeometry(0.3, 0.5, 0.1);
             const leftEar = new THREE.Mesh(earGeometry, bodyMaterial);
             leftEar.position.set(-0.4, 1.6, 0);
@@ -650,7 +668,6 @@
             rightEar.castShadow = true;
             springtrap.add(rightEar);
             
-            // Eyes (glowing red)
             const eyeMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
             const leftEye = new THREE.Mesh(new THREE.SphereGeometry(0.08, 8, 8), eyeMaterial);
             leftEye.position.set(-0.2, 1.2, 0.36);
@@ -660,7 +677,6 @@
             rightEye.position.set(0.2, 1.2, 0.36);
             springtrap.add(rightEye);
             
-            // Arms
             const armGeometry = new THREE.BoxGeometry(0.3, 1.2, 0.3);
             const leftArm = new THREE.Mesh(armGeometry, bodyMaterial);
             leftArm.position.set(-0.65, 0, 0);
@@ -672,7 +688,6 @@
             rightArm.castShadow = true;
             springtrap.add(rightArm);
             
-            // Legs
             const legGeometry = new THREE.BoxGeometry(0.3, 1, 0.3);
             const leftLeg = new THREE.Mesh(legGeometry, bodyMaterial);
             leftLeg.position.set(-0.3, -1.25, 0);
@@ -684,36 +699,26 @@
             rightLeg.castShadow = true;
             springtrap.add(rightLeg);
             
-            // Damage effects (darker patches)
-            const damageGeometry = new THREE.BoxGeometry(0.3, 0.3, 0.02);
-            const damageMaterial = new THREE.MeshBasicMaterial({ color: 0x1a1a1a });
-            const damage1 = new THREE.Mesh(damageGeometry, damageMaterial);
-            damage1.position.set(0.2, 0.3, 0.31);
-            springtrap.add(damage1);
-            
             springtrap.position.y = 2;
             
             return springtrap;
         }
         
-        // ========== CAMERA ROOMS SETUP ==========
+        // ========== CAMERA ROOMS ==========
         const cameraCanvas = document.getElementById('camera-canvas');
         const cameraScene = new THREE.Scene();
-        const cameraViewCamera = new THREE.PerspectiveCamera(75, 800 / 600, 0.1, 1000);
+        const cameraViewCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const cameraRenderer = new THREE.WebGLRenderer({ canvas: cameraCanvas, antialias: true });
-        cameraRenderer.setSize(800, 600);
+        cameraRenderer.setSize(window.innerWidth, window.innerHeight);
         cameraRenderer.shadowMap.enabled = true;
         
         const cameraRooms = {};
         const springtrapModels = {};
         
-        // Create 9 different camera rooms
         function createCameraRoom(camName) {
-            const room = new THREE.Group();
             const roomScene = new THREE.Scene();
             roomScene.fog = new THREE.Fog(0x0a0a1e, 3, 12);
             
-            // Lighting
             const ambient = new THREE.AmbientLight(0x404040, 0.4);
             roomScene.add(ambient);
             
@@ -722,7 +727,6 @@
             light.castShadow = true;
             roomScene.add(light);
             
-            // Floor
             const floor = new THREE.Mesh(
                 new THREE.PlaneGeometry(10, 10),
                 new THREE.MeshStandardMaterial({ color: 0x2a2a3e, roughness: 0.8 })
@@ -731,7 +735,6 @@
             floor.receiveShadow = true;
             roomScene.add(floor);
             
-            // Walls
             const wallMat = new THREE.MeshStandardMaterial({ color: 0x3a3a4e, roughness: 0.9 });
             
             const backWall = new THREE.Mesh(new THREE.BoxGeometry(10, 5, 0.2), wallMat);
@@ -749,11 +752,9 @@
             rightWall.receiveShadow = true;
             roomScene.add(rightWall);
             
-            // Add some room-specific props
             const colorVariations = [0x4a3020, 0x3a4050, 0x5a3030, 0x4a5a3a];
             const boxColor = colorVariations[Math.floor(Math.random() * colorVariations.length)];
             
-            // Random boxes/props
             for (let i = 0; i < 2; i++) {
                 const box = new THREE.Mesh(
                     new THREE.BoxGeometry(0.8, 0.8, 0.8),
@@ -769,7 +770,6 @@
                 roomScene.add(box);
             }
             
-            // Add Springtrap to this room
             const springtrap = createSpringtrap();
             springtrap.visible = false;
             roomScene.add(springtrap);
@@ -778,17 +778,15 @@
             return roomScene;
         }
         
-        // Create all camera rooms
         for (let i = 1; i <= 9; i++) {
             const camName = `CAM_0${i}`;
             cameraRooms[camName] = createCameraRoom(camName);
         }
         
-        // Camera position for room viewing
         cameraViewCamera.position.set(0, 2, 4);
         cameraViewCamera.lookAt(0, 1.5, 0);
         
-        // ========== JUMPSCARE SETUP ==========
+        // ========== JUMPSCARE ==========
         const jumpscareCanvas = document.getElementById('jumpscare-canvas');
         const jumpscareScene = new THREE.Scene();
         const jumpscareCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -803,7 +801,7 @@
         jumpscareLight.position.set(0, 0, 0);
         jumpscareScene.add(jumpscareLight);
         
-        // ========== MOUSE CONTROLS ==========
+        // ========== UI CONTROLS ==========
         let mouseX = 0;
         let targetRotation = 0;
         let currentRotation = 0;
@@ -815,60 +813,57 @@
             }
         });
         
-        // ========== KEYBOARD CONTROLS (ESC to close panels) ==========
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                closeAllPanels();
+        document.getElementById('camera-button').addEventListener('click', () => {
+            if (!gameState.camera) {
+                alert('Camera system is offline! Reboot it first.');
+                return;
             }
+            if (gameState.maintenanceOpen) {
+                closeMaintenancePanel();
+            }
+            openCameraSystem();
         });
         
-        // ========== PANEL FUNCTIONS ==========
-        function togglePanel(type) {
-            const panel = document.getElementById(`${type}-panel`);
-            const isActive = panel.classList.contains('active');
-            
-            closeAllPanels();
-            
-            if (!isActive) {
-                if (type === 'camera' && !gameState.camera) {
-                    alert('Camera system is offline! Reboot it first.');
-                    return;
-                }
-                if (type === 'audio' && !gameState.audio) {
-                    alert('Audio system is offline! Reboot it first.');
-                    return;
-                }
-                
-                panel.classList.add('active');
-                gameState[`${type}Open`] = true;
-                
-                if (type === 'camera') {
-                    openCameraView('CAM_01');
-                }
+        document.getElementById('maintenance-button').addEventListener('click', () => {
+            if (gameState.cameraOpen) {
+                closeCameraSystem();
+            }
+            toggleMaintenancePanel();
+        });
+        
+        document.getElementById('close-camera').addEventListener('click', closeCameraSystem);
+        document.getElementById('close-maintenance').addEventListener('click', closeMaintenancePanel);
+        
+        function openCameraSystem() {
+            gameState.cameraOpen = true;
+            document.getElementById('camera-system').classList.add('active');
+            switchCamera('CAM_01');
+        }
+        
+        function closeCameraSystem() {
+            gameState.cameraOpen = false;
+            gameState.cameraUseTime = 0;
+            document.getElementById('camera-system').classList.remove('active');
+        }
+        
+        function toggleMaintenancePanel() {
+            gameState.maintenanceOpen = !gameState.maintenanceOpen;
+            if (gameState.maintenanceOpen) {
+                document.getElementById('maintenance-panel').classList.add('active');
+            } else {
+                document.getElementById('maintenance-panel').classList.remove('active');
             }
         }
         
-        function closePanel(type) {
-            document.getElementById(`${type}-panel`).classList.remove('active');
-            gameState[`${type}Open`] = false;
-            
-            if (type === 'camera') {
-                closeCameraView();
-            }
+        function closeMaintenancePanel() {
+            gameState.maintenanceOpen = false;
+            document.getElementById('maintenance-panel').classList.remove('active');
         }
         
-        function closeAllPanels() {
-            closePanel('camera');
-            closePanel('maintenance');
-            closePanel('audio');
-        }
-        
-        function openCameraView(cam) {
+        function switchCamera(cam) {
             gameState.currentCamera = cam;
-            document.getElementById('camera-view').classList.add('active');
-            document.getElementById('current-cam-label').textContent = cam;
+            document.getElementById('camera-label').textContent = cam;
             
-            // Show/hide Springtrap in camera room
             Object.keys(springtrapModels).forEach(key => {
                 springtrapModels[key].visible = false;
             });
@@ -877,8 +872,7 @@
                 springtrapModels[cam].visible = true;
             }
             
-            // Update active button
-            document.querySelectorAll('.camera-button').forEach(btn => {
+            document.querySelectorAll('.camera-btn').forEach(btn => {
                 btn.classList.remove('active');
                 if (btn.dataset.cam === cam) {
                     btn.classList.add('active');
@@ -886,56 +880,122 @@
             });
         }
         
-        function closeCameraView() {
-            document.getElementById('camera-view').classList.remove('active');
-        }
-        
-        // Camera button clicks
-        document.querySelectorAll('.camera-button').forEach(btn => {
+        document.querySelectorAll('.camera-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 if (gameState.camera) {
-                    openCameraView(btn.dataset.cam);
+                    switchCamera(btn.dataset.cam);
                 }
             });
         });
         
         // ========== AUDIO LURE SYSTEM ==========
-        document.querySelectorAll('.audio-button').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const targetCam = btn.dataset.cam;
-                if (targetCam && gameState.audio) {
-                    console.log(`Playing audio at ${targetCam}`);
-                    if (Math.random() > 0.3) {
-                        moveSpringtrapTowards(targetCam);
-                    }
-                    closePanel('audio');
-                }
-            });
+        document.getElementById('audio-lure-btn').addEventListener('click', () => {
+            if (!gameState.audio) {
+                alert('Audio system is offline!');
+                return;
+            }
+            
+            if (gameState.audioUsesRemaining <= 0) {
+                alert('No audio lures remaining this night!');
+                return;
+            }
+            
+            const targetCam = gameState.currentCamera;
+            console.log(`Playing audio at ${targetCam}`);
+            
+            if (gameState.audioUsesRemaining !== Infinity) {
+                gameState.audioUsesRemaining--;
+                updateAudioDisplay();
+            }
+            
+            if (Math.random() > 0.25) {
+                moveSpringtrapTowards(targetCam);
+            }
+            
+            gameState.audioUsesBeforeError--;
+            if (gameState.audioUsesBeforeError <= 0) {
+                gameState.audio = false;
+                updateSystemStatus();
+            }
         });
         
-        // ========== MAINTENANCE SYSTEM ==========
-        document.getElementById('reboot-vent').addEventListener('click', () => rebootSystem('ventilation'));
-        document.getElementById('reboot-camera').addEventListener('click', () => rebootSystem('camera'));
-        document.getElementById('reboot-audio').addEventListener('click', () => rebootSystem('audio'));
+        function updateAudioDisplay() {
+            const display = gameState.audioUsesRemaining === Infinity ? '∞' : gameState.audioUsesRemaining;
+            document.getElementById('audio-uses').textContent = display;
+            
+            const btn = document.getElementById('audio-lure-btn');
+            btn.disabled = gameState.audioUsesRemaining <= 0 || !gameState.audio;
+        }
         
-        function rebootSystem(system) {
+        // ========== MAINTENANCE SYSTEM ==========
+        document.getElementById('reboot-vent').addEventListener('click', () => rebootSystem('ventilation', 5000));
+        document.getElementById('reboot-camera').addEventListener('click', () => rebootSystem('camera', 5000));
+        document.getElementById('reboot-audio').addEventListener('click', () => rebootSystem('audio', 5000));
+        document.getElementById('reboot-all').addEventListener('click', () => rebootAllSystems());
+        
+        function rebootSystem(system, duration) {
             if (gameState.rebooting) return;
             
             gameState.rebooting = system;
             const btn = document.getElementById(`reboot-${system}`);
             btn.disabled = true;
-            btn.textContent = 'REBOOTING...';
+            const originalText = btn.innerHTML;
             
-            document.querySelectorAll('.maintenance-button').forEach(b => b.disabled = true);
+            let timeLeft = duration / 1000;
+            btn.innerHTML = `REBOOTING...<br>${timeLeft}s`;
+            
+            document.querySelectorAll('.reboot-btn').forEach(b => b.disabled = true);
+            
+            const interval = setInterval(() => {
+                timeLeft--;
+                btn.innerHTML = `REBOOTING...<br>${timeLeft}s`;
+            }, 1000);
             
             setTimeout(() => {
+                clearInterval(interval);
                 gameState[system] = true;
                 gameState.rebooting = null;
                 btn.disabled = false;
-                btn.textContent = `REBOOT ${system.toUpperCase()}`;
-                document.querySelectorAll('.maintenance-button').forEach(b => b.disabled = false);
+                btn.innerHTML = originalText;
+                document.querySelectorAll('.reboot-btn').forEach(b => b.disabled = false);
                 updateSystemStatus();
-            }, 3000);
+                
+                if (system === 'audio') {
+                    gameState.audioUsesBeforeError = 5 + Math.floor(Math.random() * 5);
+                }
+            }, duration);
+        }
+        
+        function rebootAllSystems() {
+            if (gameState.rebooting) return;
+            
+            gameState.rebooting = 'all';
+            const btn = document.getElementById('reboot-all');
+            btn.disabled = true;
+            const originalText = btn.innerHTML;
+            
+            let timeLeft = 12;
+            btn.innerHTML = `REBOOTING...<br>${timeLeft}s`;
+            
+            document.querySelectorAll('.reboot-btn').forEach(b => b.disabled = true);
+            
+            const interval = setInterval(() => {
+                timeLeft--;
+                btn.innerHTML = `REBOOTING...<br>${timeLeft}s`;
+            }, 1000);
+            
+            setTimeout(() => {
+                clearInterval(interval);
+                gameState.ventilation = true;
+                gameState.camera = true;
+                gameState.audio = true;
+                gameState.rebooting = null;
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+                document.querySelectorAll('.reboot-btn').forEach(b => b.disabled = false);
+                updateSystemStatus();
+                gameState.audioUsesBeforeError = 5 + Math.floor(Math.random() * 5);
+            }, 12000);
         }
         
         function updateSystemStatus() {
@@ -955,7 +1015,8 @@
             
             if (possibleMoves.length > 0) {
                 let nextLocation;
-                if (possibleMoves.includes('OFFICE') && Math.random() > 0.5) {
+                
+                if (possibleMoves.includes('OFFICE') && Math.random() > 0.6) {
                     nextLocation = 'OFFICE';
                 } else {
                     nextLocation = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
@@ -965,15 +1026,19 @@
                 document.getElementById('springtrap-location').textContent = nextLocation;
                 
                 if (nextLocation === 'OFFICE') {
-                    if (!gameState.cameraOpen || Math.random() > 0.4) {
+                    if (!gameState.cameraOpen || Math.random() > 0.5) {
                         triggerJumpscare();
                     } else {
-                        gameState.springtrapLocation = possibleMoves[0];
+                        const safeMoves = possibleMoves.filter(m => m !== 'OFFICE');
+                        if (safeMoves.length > 0) {
+                            gameState.springtrapLocation = safeMoves[0];
+                            document.getElementById('springtrap-location').textContent = safeMoves[0];
+                        }
                     }
                 }
                 
-                if (gameState.cameraOpen) {
-                    openCameraView(gameState.currentCamera);
+                if (gameState.cameraOpen && gameState.camera) {
+                    switchCamera(gameState.currentCamera);
                 }
             }
         }
@@ -983,23 +1048,28 @@
             if (possibleMoves.includes(targetCam)) {
                 gameState.springtrapLocation = targetCam;
                 document.getElementById('springtrap-location').textContent = targetCam;
+                
+                if (gameState.cameraOpen && gameState.camera) {
+                    switchCamera(gameState.currentCamera);
+                }
             }
         }
         
         function causeSystemFailure() {
             if (gameState.gameOver) return;
             
-            const systems = ['ventilation', 'camera', 'audio'];
-            const workingSystems = systems.filter(s => gameState[s]);
+            const systems = [];
+            if (gameState.ventilation) systems.push('ventilation');
+            if (gameState.camera) systems.push('camera');
+            if (gameState.audio) systems.push('audio');
             
-            if (workingSystems.length > 0) {
-                const failSystem = workingSystems[Math.floor(Math.random() * workingSystems.length)];
+            if (systems.length > 0 && Math.random() > 0.7) {
+                const failSystem = systems[Math.floor(Math.random() * systems.length)];
                 gameState[failSystem] = false;
                 updateSystemStatus();
                 
                 if (failSystem === 'camera' && gameState.cameraOpen) {
-                    closeCameraView();
-                    closePanel('camera');
+                    closeCameraSystem();
                 }
             }
         }
@@ -1008,7 +1078,8 @@
         let jumpscareAnimation = 0;
         function triggerJumpscare() {
             gameState.gameOver = true;
-            closeAllPanels();
+            closeCameraSystem();
+            closeMaintenancePanel();
             document.getElementById('jumpscare').style.display = 'flex';
             
             jumpscareAnimation = 0;
@@ -1045,28 +1116,34 @@
         function gameLoop() {
             if (gameState.gameOver || gameState.won) return;
             
-            gameState.ventFailTimer++;
             gameState.springtrapMoveTimer++;
             
-            if (gameState.springtrapMoveTimer > 800 + Math.random() * 400) {
+            if (gameState.springtrapMoveTimer > 900 + Math.random() * 600) {
                 moveSpringtrap();
                 gameState.springtrapMoveTimer = 0;
             }
             
-            if (gameState.ventFailTimer > 1500 + Math.random() * 800) {
+            if (gameState.cameraOpen && gameState.camera) {
+                gameState.cameraUseTime++;
+                if (gameState.cameraUseTime > 1800 && Math.random() > 0.998) {
+                    gameState.camera = false;
+                    updateSystemStatus();
+                    closeCameraSystem();
+                }
+            }
+            
+            if (Math.random() > 0.9995) {
                 causeSystemFailure();
-                gameState.ventFailTimer = 0;
             }
         }
         
-        // Time progression
         setInterval(() => {
             if (!gameState.gameOver && !gameState.won && gameState.time < 6) {
                 gameState.time++;
                 updateTime();
                 checkWin();
             }
-        }, 50000); // 50 seconds per hour
+        }, 50000);
         
         // ========== RENDER LOOPS ==========
         function animate() {
@@ -1075,13 +1152,11 @@
             if (!gameState.gameOver && !gameState.won) {
                 gameLoop();
                 
-                // Office camera rotation
                 currentRotation += (targetRotation - currentRotation) * 0.05;
                 officeCamera.rotation.y = currentRotation;
                 
                 officeRenderer.render(officeScene, officeCamera);
                 
-                // Render camera view if open
                 if (gameState.cameraOpen && gameState.camera) {
                     const currentRoom = cameraRooms[gameState.currentCamera];
                     if (currentRoom) {
@@ -1091,25 +1166,33 @@
             }
         }
         
-        // Handle window resize
         window.addEventListener('resize', () => {
             officeCamera.aspect = window.innerWidth / window.innerHeight;
             officeCamera.updateProjectionMatrix();
             officeRenderer.setSize(window.innerWidth, window.innerHeight);
+            
+            cameraViewCamera.aspect = window.innerWidth / window.innerHeight;
+            cameraViewCamera.updateProjectionMatrix();
+            cameraRenderer.setSize(window.innerWidth, window.innerHeight);
+            
+            jumpscareCamera.aspect = window.innerWidth / window.innerHeight;
+            jumpscareCamera.updateProjectionMatrix();
+            jumpscareRenderer.setSize(window.innerWidth, window.innerHeight);
         });
         
-        // Start game
+        gameState.audioUsesRemaining = audioLimits[gameState.night];
+        gameState.audioUsesBeforeError = 5 + Math.floor(Math.random() * 5);
         updateTime();
         updateSystemStatus();
+        updateAudioDisplay();
         animate();
         
-        console.log('%cFNAF 3 Full 3D Game Loaded', 'color: #0f0; font-size: 18px; font-weight: bold;');
+        console.log('%cFNAF 3 Improved - Game Loaded!', 'color: #0f0; font-size: 18px; font-weight: bold;');
         console.log('%cControls:', 'color: #0f0;');
         console.log('- Mouse: Look around office');
-        console.log('- CAMERAS: View 3D camera rooms');
-        console.log('- MAINTENANCE: Reboot systems');
-        console.log('- AUDIO: Lure Springtrap');
-        console.log('- ESC or X buttons: Close panels');
+        console.log('- CAMERA SYSTEM: View 9 camera rooms');
+        console.log('- MAINTENANCE PANEL: Reboot systems');
+        console.log('- AUDIO LURE: Distract Springtrap');
         console.log('%cSurvive until 6 AM!', 'color: #ff0;');
     </script>
 </body>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Five Nights at Freddy's 3 - Fan Game</title>
+    <title>Five Nights at Freddy's 3 - Full 3D</title>
     <style>
         * {
             margin: 0;
@@ -16,7 +16,6 @@
             background: #000;
             color: #0f0;
             overflow: hidden;
-            cursor: none;
         }
         
         #game-container {
@@ -25,42 +24,10 @@
             position: relative;
         }
         
-        #office-view {
+        #office-canvas {
             width: 100%;
             height: 100%;
-            background: linear-gradient(180deg, #1a1a2e 0%, #0f0f1e 100%);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .office-wall {
-            position: absolute;
-            bottom: 0;
-            width: 300%;
-            height: 100%;
-            background: linear-gradient(180deg, #2a2a3e 0%, #1a1a2e 50%, #0a0a1e 100%);
-            left: 50%;
-            transform: translateX(-50%);
-            transition: transform 0.1s linear;
-        }
-        
-        .vent {
-            position: absolute;
-            width: 150px;
-            height: 100px;
-            background: #000;
-            border: 3px solid #333;
-            border-radius: 5px;
-        }
-        
-        .vent.left {
-            left: 15%;
-            top: 40%;
-        }
-        
-        .vent.right {
-            right: 15%;
-            top: 40%;
+            display: block;
         }
         
         #hud {
@@ -72,6 +39,7 @@
             padding: 15px;
             border: 2px solid #0f0;
             font-size: 14px;
+            pointer-events: none;
         }
         
         #time {
@@ -105,26 +73,52 @@
             box-shadow: 0 0 10px #f00;
         }
         
-        #camera-panel {
+        .panel {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0, 0, 0, 0.95);
             border: 2px solid #0f0;
-            padding: 15px;
+            padding: 20px;
             display: none;
             z-index: 150;
         }
         
-        #camera-panel.active {
+        .panel.active {
             display: block;
+        }
+        
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            color: #0f0;
+        }
+        
+        .close-btn {
+            background: #f00;
+            border: 2px solid #f00;
+            color: #fff;
+            padding: 5px 15px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
+        
+        .close-btn:hover {
+            background: #fff;
+            color: #f00;
+        }
+        
+        #camera-panel {
+            bottom: 20px;
+            right: 20px;
+            max-width: 400px;
         }
         
         .camera-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 10px;
-            margin-top: 10px;
         }
         
         .camera-button {
@@ -150,32 +144,25 @@
         
         #camera-view {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            height: 80%;
             background: #000;
+            border: 3px solid #0f0;
             display: none;
             z-index: 200;
         }
         
         #camera-view.active {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+            display: block;
         }
         
-        .camera-feed {
-            width: 80%;
-            height: 70%;
-            background: linear-gradient(180deg, #1a1a2e 0%, #0f0f1e 100%);
-            border: 3px solid #0f0;
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 24px;
+        #camera-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
         }
         
         .camera-label {
@@ -185,21 +172,17 @@
             font-size: 18px;
             color: #0f0;
             text-shadow: 0 0 10px #0f0;
+            z-index: 201;
         }
         
         #maintenance-panel {
-            position: fixed;
             bottom: 20px;
             left: 20px;
-            background: rgba(0, 0, 0, 0.9);
-            border: 2px solid #f90;
-            padding: 15px;
-            z-index: 150;
-            display: none;
+            border-color: #f90;
         }
         
-        #maintenance-panel.active {
-            display: block;
+        #maintenance-panel .panel-header {
+            color: #f90;
         }
         
         .maintenance-button {
@@ -210,13 +193,13 @@
             margin: 5px;
             cursor: pointer;
             font-family: 'Courier New', monospace;
-            transition: all 0.2s;
+            display: block;
+            width: 100%;
         }
         
         .maintenance-button:hover:not(:disabled) {
             background: #f90;
             color: #000;
-            box-shadow: 0 0 15px #f90;
         }
         
         .maintenance-button:disabled {
@@ -225,19 +208,20 @@
         }
         
         #audio-panel {
-            position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.95);
-            border: 2px solid #0ff;
-            padding: 20px;
-            display: none;
-            z-index: 250;
+            border-color: #0ff;
         }
         
-        #audio-panel.active {
-            display: block;
+        #audio-panel .panel-header {
+            color: #0ff;
+        }
+        
+        .audio-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
         }
         
         .audio-button {
@@ -245,7 +229,6 @@
             border: 2px solid #0ff;
             color: #0ff;
             padding: 15px;
-            margin: 10px;
             cursor: pointer;
             font-family: 'Courier New', monospace;
         }
@@ -290,7 +273,7 @@
             height: 100%;
             pointer-events: none;
             opacity: 0.03;
-            z-index: 999;
+            z-index: 99;
             background: repeating-linear-gradient(
                 0deg,
                 transparent,
@@ -306,17 +289,6 @@
             100% { transform: translateY(4px); }
         }
         
-        #crosshair {
-            position: fixed;
-            width: 20px;
-            height: 20px;
-            border: 2px solid rgba(0, 255, 0, 0.5);
-            border-radius: 50%;
-            pointer-events: none;
-            transform: translate(-50%, -50%);
-            z-index: 1000;
-        }
-        
         #jumpscare {
             position: fixed;
             top: 0;
@@ -328,17 +300,11 @@
             justify-content: center;
             align-items: center;
             z-index: 9999;
-            font-size: 72px;
-            color: #f00;
-            text-shadow: 0 0 30px #f00;
-            animation: shake 0.1s infinite;
         }
         
-        @keyframes shake {
-            0%, 100% { transform: translate(0, 0) rotate(0deg); }
-            25% { transform: translate(-10px, 10px) rotate(-5deg); }
-            50% { transform: translate(10px, -10px) rotate(5deg); }
-            75% { transform: translate(-10px, -10px) rotate(-5deg); }
+        #jumpscare canvas {
+            width: 100%;
+            height: 100%;
         }
         
         #game-over, #victory {
@@ -359,12 +325,14 @@
             color: #f00;
             font-size: 64px;
             margin-bottom: 20px;
+            text-shadow: 0 0 30px #f00;
         }
         
         #victory h1 {
             color: #0f0;
             font-size: 64px;
             margin-bottom: 20px;
+            text-shadow: 0 0 30px #0f0;
         }
         
         .restart-btn {
@@ -383,29 +351,20 @@
             color: #000;
         }
         
-        .springtrap-indicator {
-            width: 30px;
-            height: 30px;
-            background: #f00;
-            border-radius: 50%;
-            box-shadow: 0 0 20px #f00;
-            animation: pulse 1s infinite;
+        .springtrap-warning {
+            color: #f00;
+            animation: blink 0.5s infinite;
         }
         
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
         }
     </style>
 </head>
 <body>
     <div id="game-container">
-        <div id="office-view">
-            <div class="office-wall" id="office-wall">
-                <div class="vent left"></div>
-                <div class="vent right"></div>
-            </div>
-        </div>
+        <canvas id="office-canvas"></canvas>
         
         <div id="hud">
             <div id="time">12 AM</div>
@@ -422,12 +381,15 @@
                 <span>AUDIO DEVICES</span>
             </div>
             <div style="margin-top: 10px;">
-                <div>SPRINGTRAP: <span id="springtrap-location">CAM 01</span></span>
+                <div>SPRINGTRAP: <span id="springtrap-location">CAM 01</span></div>
             </div>
         </div>
         
-        <div id="camera-panel">
-            <h3 style="color: #0f0; margin-bottom: 10px;">CAMERA SYSTEM</h3>
+        <div id="camera-panel" class="panel">
+            <div class="panel-header">
+                <h3>CAMERA SYSTEM</h3>
+                <button class="close-btn" onclick="closePanel('camera')">✕ CLOSE</button>
+            </div>
             <div class="camera-grid">
                 <button class="camera-button" data-cam="CAM_01">CAM 01</button>
                 <button class="camera-button" data-cam="CAM_02">CAM 02</button>
@@ -441,18 +403,24 @@
             </div>
         </div>
         
-        <div id="maintenance-panel">
-            <h3 style="color: #f90; margin-bottom: 10px;">MAINTENANCE</h3>
-            <p style="color: #f90; font-size: 12px; margin-bottom: 10px;">Only one system can reboot at a time</p>
+        <div id="maintenance-panel" class="panel">
+            <div class="panel-header">
+                <h3>MAINTENANCE</h3>
+                <button class="close-btn" onclick="closePanel('maintenance')">✕ CLOSE</button>
+            </div>
+            <p style="font-size: 12px; margin-bottom: 10px; color: #f90;">Only one system can reboot at a time (3 seconds)</p>
             <button class="maintenance-button" id="reboot-vent">REBOOT VENTILATION</button>
             <button class="maintenance-button" id="reboot-camera">REBOOT CAMERA</button>
             <button class="maintenance-button" id="reboot-audio">REBOOT AUDIO</button>
         </div>
         
-        <div id="audio-panel">
-            <h3 style="color: #0ff; margin-bottom: 10px;">AUDIO LURE</h3>
-            <p style="color: #0ff; font-size: 12px; margin-bottom: 10px;">Play audio to lure Springtrap</p>
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+        <div id="audio-panel" class="panel">
+            <div class="panel-header">
+                <h3>AUDIO LURE SYSTEM</h3>
+                <button class="close-btn" onclick="closePanel('audio')">✕ CLOSE</button>
+            </div>
+            <p style="font-size: 12px; margin-bottom: 10px; color: #0ff;">Play BB's voice to lure Springtrap</p>
+            <div class="audio-grid">
                 <button class="audio-button" data-cam="CAM_01">CAM 01</button>
                 <button class="audio-button" data-cam="CAM_02">CAM 02</button>
                 <button class="audio-button" data-cam="CAM_03">CAM 03</button>
@@ -463,24 +431,22 @@
                 <button class="audio-button" data-cam="CAM_08">CAM 08</button>
                 <button class="audio-button" data-cam="CAM_09">CAM 09</button>
             </div>
-            <button class="audio-button" style="margin-top: 10px; width: 100%;" onclick="closeAudioPanel()">CLOSE</button>
         </div>
         
         <div id="camera-view">
-            <div class="camera-feed">
-                <div class="camera-label" id="current-cam-label">CAM 01</div>
-                <div id="camera-content">No signal...</div>
-            </div>
+            <div class="camera-label" id="current-cam-label">CAM 01</div>
+            <canvas id="camera-canvas"></canvas>
+            <button class="close-btn" style="position: absolute; top: 10px; right: 10px; z-index: 202;" onclick="closeCameraView()">✕ CLOSE</button>
         </div>
         
         <div id="toggle-buttons">
-            <button class="toggle-btn" onclick="toggleCameras()">CAMERAS</button>
-            <button class="toggle-btn" onclick="toggleMaintenance()">MAINTENANCE</button>
-            <button class="toggle-btn" onclick="toggleAudio()">AUDIO</button>
+            <button class="toggle-btn" onclick="togglePanel('camera')">CAMERAS</button>
+            <button class="toggle-btn" onclick="togglePanel('maintenance')">MAINTENANCE</button>
+            <button class="toggle-btn" onclick="togglePanel('audio')">AUDIO</button>
         </div>
         
         <div id="jumpscare">
-            <div>SPRINGTRAP</div>
+            <canvas id="jumpscare-canvas"></canvas>
         </div>
         
         <div id="game-over">
@@ -496,13 +462,13 @@
         </div>
         
         <div class="static-overlay"></div>
-        <div id="crosshair"></div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
         // Game State
-        let gameState = {
-            time: 0, // 0 = 12AM, 6 = 6AM
+        const gameState = {
+            time: 0,
             ventilation: true,
             camera: true,
             audio: true,
@@ -515,11 +481,10 @@
             gameOver: false,
             won: false,
             ventFailTimer: 0,
-            springtrapMoveTimer: 0,
-            officeWallOffset: 0
+            springtrapMoveTimer: 0
         };
         
-        // Camera locations map (adjacency for pathfinding)
+        // Camera map
         const cameraMap = {
             'CAM_01': ['CAM_02', 'CAM_04'],
             'CAM_02': ['CAM_01', 'CAM_03', 'CAM_05'],
@@ -533,64 +498,383 @@
             'OFFICE': ['CAM_07', 'CAM_08', 'CAM_09']
         };
         
-        // Mouse tracking for office view
-        document.addEventListener('mousemove', (e) => {
-            const crosshair = document.getElementById('crosshair');
-            crosshair.style.left = e.clientX + 'px';
-            crosshair.style.top = e.clientY + 'px';
+        // ========== OFFICE SCENE SETUP ==========
+        const officeCanvas = document.getElementById('office-canvas');
+        const officeScene = new THREE.Scene();
+        const officeCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const officeRenderer = new THREE.WebGLRenderer({ canvas: officeCanvas, antialias: true });
+        officeRenderer.setSize(window.innerWidth, window.innerHeight);
+        officeRenderer.shadowMap.enabled = true;
+        
+        officeScene.fog = new THREE.Fog(0x0a0a1e, 5, 15);
+        
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0x404040, 0.3);
+        officeScene.add(ambientLight);
+        
+        const officeLight = new THREE.PointLight(0xffaa00, 0.8, 20);
+        officeLight.position.set(0, 3, 0);
+        officeLight.castShadow = true;
+        officeScene.add(officeLight);
+        
+        // Office Floor
+        const floorGeometry = new THREE.PlaneGeometry(20, 20);
+        const floorMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x2a2a3e,
+            roughness: 0.8
+        });
+        const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+        floor.rotation.x = -Math.PI / 2;
+        floor.receiveShadow = true;
+        officeScene.add(floor);
+        
+        // Office Walls
+        const wallMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x3a3a4e,
+            roughness: 0.9
+        });
+        
+        // Back wall
+        const backWall = new THREE.Mesh(new THREE.BoxGeometry(20, 5, 0.2), wallMaterial);
+        backWall.position.set(0, 2.5, -10);
+        backWall.receiveShadow = true;
+        officeScene.add(backWall);
+        
+        // Left wall
+        const leftWall = new THREE.Mesh(new THREE.BoxGeometry(0.2, 5, 20), wallMaterial);
+        leftWall.position.set(-10, 2.5, 0);
+        leftWall.receiveShadow = true;
+        officeScene.add(leftWall);
+        
+        // Right wall
+        const rightWall = new THREE.Mesh(new THREE.BoxGeometry(0.2, 5, 20), wallMaterial);
+        rightWall.position.set(10, 2.5, 0);
+        rightWall.receiveShadow = true;
+        officeScene.add(rightWall);
+        
+        // Desk
+        const deskGeometry = new THREE.BoxGeometry(4, 0.2, 2);
+        const deskMaterial = new THREE.MeshStandardMaterial({ color: 0x4a3020 });
+        const desk = new THREE.Mesh(deskGeometry, deskMaterial);
+        desk.position.set(0, 1, 2);
+        desk.castShadow = true;
+        officeScene.add(desk);
+        
+        // Desk legs
+        for (let x of [-1.8, 1.8]) {
+            for (let z of [1, 3]) {
+                const leg = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.2, 1, 0.2),
+                    deskMaterial
+                );
+                leg.position.set(x, 0.5, z);
+                leg.castShadow = true;
+                officeScene.add(leg);
+            }
+        }
+        
+        // Monitor on desk
+        const monitorBase = new THREE.Mesh(
+            new THREE.BoxGeometry(0.8, 0.8, 0.3),
+            new THREE.MeshStandardMaterial({ color: 0x1a1a2e })
+        );
+        monitorBase.position.set(0, 1.6, 2);
+        monitorBase.castShadow = true;
+        officeScene.add(monitorBase);
+        
+        // Monitor screen
+        const screenMaterial = new THREE.MeshBasicMaterial({ color: 0x003300 });
+        const screen = new THREE.Mesh(
+            new THREE.PlaneGeometry(0.7, 0.5),
+            screenMaterial
+        );
+        screen.position.set(0, 1.6, 2.16);
+        officeScene.add(screen);
+        
+        // Left door frame
+        const doorFrameLeft = new THREE.Mesh(
+            new THREE.BoxGeometry(2, 4, 0.3),
+            new THREE.MeshStandardMaterial({ color: 0x2a2a2a })
+        );
+        doorFrameLeft.position.set(-6, 2, -9.9);
+        officeScene.add(doorFrameLeft);
+        
+        // Right door frame
+        const doorFrameRight = new THREE.Mesh(
+            new THREE.BoxGeometry(2, 4, 0.3),
+            new THREE.MeshStandardMaterial({ color: 0x2a2a2a })
+        );
+        doorFrameRight.position.set(6, 2, -9.9);
+        officeScene.add(doorFrameRight);
+        
+        // Vent grilles
+        const ventMaterial = new THREE.MeshStandardMaterial({ color: 0x0a0a0a });
+        const leftVent = new THREE.Mesh(new THREE.BoxGeometry(1, 0.8, 0.1), ventMaterial);
+        leftVent.position.set(-7, 1.5, -9.85);
+        officeScene.add(leftVent);
+        
+        const rightVent = new THREE.Mesh(new THREE.BoxGeometry(1, 0.8, 0.1), ventMaterial);
+        rightVent.position.set(7, 1.5, -9.85);
+        officeScene.add(rightVent);
+        
+        // Camera position
+        officeCamera.position.set(0, 1.6, 5);
+        
+        // ========== SPRINGTRAP MODEL ==========
+        function createSpringtrap() {
+            const springtrap = new THREE.Group();
             
+            // Body
+            const bodyGeometry = new THREE.BoxGeometry(1, 1.5, 0.6);
+            const bodyMaterial = new THREE.MeshStandardMaterial({ color: 0x4a6e2e });
+            const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+            body.castShadow = true;
+            springtrap.add(body);
+            
+            // Head
+            const headGeometry = new THREE.BoxGeometry(0.8, 0.8, 0.7);
+            const head = new THREE.Mesh(headGeometry, bodyMaterial);
+            head.position.y = 1.15;
+            head.castShadow = true;
+            springtrap.add(head);
+            
+            // Ears
+            const earGeometry = new THREE.BoxGeometry(0.3, 0.5, 0.1);
+            const leftEar = new THREE.Mesh(earGeometry, bodyMaterial);
+            leftEar.position.set(-0.4, 1.6, 0);
+            leftEar.castShadow = true;
+            springtrap.add(leftEar);
+            
+            const rightEar = new THREE.Mesh(earGeometry, bodyMaterial);
+            rightEar.position.set(0.4, 1.6, 0);
+            rightEar.castShadow = true;
+            springtrap.add(rightEar);
+            
+            // Eyes (glowing red)
+            const eyeMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+            const leftEye = new THREE.Mesh(new THREE.SphereGeometry(0.08, 8, 8), eyeMaterial);
+            leftEye.position.set(-0.2, 1.2, 0.36);
+            springtrap.add(leftEye);
+            
+            const rightEye = new THREE.Mesh(new THREE.SphereGeometry(0.08, 8, 8), eyeMaterial);
+            rightEye.position.set(0.2, 1.2, 0.36);
+            springtrap.add(rightEye);
+            
+            // Arms
+            const armGeometry = new THREE.BoxGeometry(0.3, 1.2, 0.3);
+            const leftArm = new THREE.Mesh(armGeometry, bodyMaterial);
+            leftArm.position.set(-0.65, 0, 0);
+            leftArm.castShadow = true;
+            springtrap.add(leftArm);
+            
+            const rightArm = new THREE.Mesh(armGeometry, bodyMaterial);
+            rightArm.position.set(0.65, 0, 0);
+            rightArm.castShadow = true;
+            springtrap.add(rightArm);
+            
+            // Legs
+            const legGeometry = new THREE.BoxGeometry(0.3, 1, 0.3);
+            const leftLeg = new THREE.Mesh(legGeometry, bodyMaterial);
+            leftLeg.position.set(-0.3, -1.25, 0);
+            leftLeg.castShadow = true;
+            springtrap.add(leftLeg);
+            
+            const rightLeg = new THREE.Mesh(legGeometry, bodyMaterial);
+            rightLeg.position.set(0.3, -1.25, 0);
+            rightLeg.castShadow = true;
+            springtrap.add(rightLeg);
+            
+            // Damage effects (darker patches)
+            const damageGeometry = new THREE.BoxGeometry(0.3, 0.3, 0.02);
+            const damageMaterial = new THREE.MeshBasicMaterial({ color: 0x1a1a1a });
+            const damage1 = new THREE.Mesh(damageGeometry, damageMaterial);
+            damage1.position.set(0.2, 0.3, 0.31);
+            springtrap.add(damage1);
+            
+            springtrap.position.y = 2;
+            
+            return springtrap;
+        }
+        
+        // ========== CAMERA ROOMS SETUP ==========
+        const cameraCanvas = document.getElementById('camera-canvas');
+        const cameraScene = new THREE.Scene();
+        const cameraViewCamera = new THREE.PerspectiveCamera(75, 800 / 600, 0.1, 1000);
+        const cameraRenderer = new THREE.WebGLRenderer({ canvas: cameraCanvas, antialias: true });
+        cameraRenderer.setSize(800, 600);
+        cameraRenderer.shadowMap.enabled = true;
+        
+        const cameraRooms = {};
+        const springtrapModels = {};
+        
+        // Create 9 different camera rooms
+        function createCameraRoom(camName) {
+            const room = new THREE.Group();
+            const roomScene = new THREE.Scene();
+            roomScene.fog = new THREE.Fog(0x0a0a1e, 3, 12);
+            
+            // Lighting
+            const ambient = new THREE.AmbientLight(0x404040, 0.4);
+            roomScene.add(ambient);
+            
+            const light = new THREE.PointLight(0xffaa00, 0.6, 15);
+            light.position.set(0, 3, 0);
+            light.castShadow = true;
+            roomScene.add(light);
+            
+            // Floor
+            const floor = new THREE.Mesh(
+                new THREE.PlaneGeometry(10, 10),
+                new THREE.MeshStandardMaterial({ color: 0x2a2a3e, roughness: 0.8 })
+            );
+            floor.rotation.x = -Math.PI / 2;
+            floor.receiveShadow = true;
+            roomScene.add(floor);
+            
+            // Walls
+            const wallMat = new THREE.MeshStandardMaterial({ color: 0x3a3a4e, roughness: 0.9 });
+            
+            const backWall = new THREE.Mesh(new THREE.BoxGeometry(10, 5, 0.2), wallMat);
+            backWall.position.set(0, 2.5, -5);
+            backWall.receiveShadow = true;
+            roomScene.add(backWall);
+            
+            const leftWall = new THREE.Mesh(new THREE.BoxGeometry(0.2, 5, 10), wallMat);
+            leftWall.position.set(-5, 2.5, 0);
+            leftWall.receiveShadow = true;
+            roomScene.add(leftWall);
+            
+            const rightWall = new THREE.Mesh(new THREE.BoxGeometry(0.2, 5, 10), wallMat);
+            rightWall.position.set(5, 2.5, 0);
+            rightWall.receiveShadow = true;
+            roomScene.add(rightWall);
+            
+            // Add some room-specific props
+            const colorVariations = [0x4a3020, 0x3a4050, 0x5a3030, 0x4a5a3a];
+            const boxColor = colorVariations[Math.floor(Math.random() * colorVariations.length)];
+            
+            // Random boxes/props
+            for (let i = 0; i < 2; i++) {
+                const box = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.8, 0.8, 0.8),
+                    new THREE.MeshStandardMaterial({ color: boxColor })
+                );
+                box.position.set(
+                    (Math.random() - 0.5) * 6,
+                    0.4,
+                    (Math.random() - 0.5) * 6
+                );
+                box.castShadow = true;
+                box.receiveShadow = true;
+                roomScene.add(box);
+            }
+            
+            // Add Springtrap to this room
+            const springtrap = createSpringtrap();
+            springtrap.visible = false;
+            roomScene.add(springtrap);
+            springtrapModels[camName] = springtrap;
+            
+            return roomScene;
+        }
+        
+        // Create all camera rooms
+        for (let i = 1; i <= 9; i++) {
+            const camName = `CAM_0${i}`;
+            cameraRooms[camName] = createCameraRoom(camName);
+        }
+        
+        // Camera position for room viewing
+        cameraViewCamera.position.set(0, 2, 4);
+        cameraViewCamera.lookAt(0, 1.5, 0);
+        
+        // ========== JUMPSCARE SETUP ==========
+        const jumpscareCanvas = document.getElementById('jumpscare-canvas');
+        const jumpscareScene = new THREE.Scene();
+        const jumpscareCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const jumpscareRenderer = new THREE.WebGLRenderer({ canvas: jumpscareCanvas, antialias: true });
+        jumpscareRenderer.setSize(window.innerWidth, window.innerHeight);
+        
+        const jumpscareSpringtrap = createSpringtrap();
+        jumpscareSpringtrap.position.set(0, 0, -2);
+        jumpscareScene.add(jumpscareSpringtrap);
+        
+        const jumpscareLight = new THREE.PointLight(0xff0000, 2, 10);
+        jumpscareLight.position.set(0, 0, 0);
+        jumpscareScene.add(jumpscareLight);
+        
+        // ========== MOUSE CONTROLS ==========
+        let mouseX = 0;
+        let targetRotation = 0;
+        let currentRotation = 0;
+        
+        document.addEventListener('mousemove', (e) => {
             if (!gameState.cameraOpen && !gameState.gameOver) {
-                const mouseX = (e.clientX / window.innerWidth) * 2 - 1;
-                gameState.officeWallOffset = -mouseX * 30;
-                document.getElementById('office-wall').style.transform = 
-                    `translateX(calc(-50% + ${gameState.officeWallOffset}%))`;
+                mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+                targetRotation = -mouseX * 0.3;
             }
         });
         
-        // Toggle functions
-        function toggleCameras() {
-            gameState.cameraOpen = !gameState.cameraOpen;
-            document.getElementById('camera-panel').classList.toggle('active');
-            if (gameState.cameraOpen) {
-                openCameraView('CAM_01');
-            } else {
+        // ========== KEYBOARD CONTROLS (ESC to close panels) ==========
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeAllPanels();
+            }
+        });
+        
+        // ========== PANEL FUNCTIONS ==========
+        function togglePanel(type) {
+            const panel = document.getElementById(`${type}-panel`);
+            const isActive = panel.classList.contains('active');
+            
+            closeAllPanels();
+            
+            if (!isActive) {
+                if (type === 'camera' && !gameState.camera) {
+                    alert('Camera system is offline! Reboot it first.');
+                    return;
+                }
+                if (type === 'audio' && !gameState.audio) {
+                    alert('Audio system is offline! Reboot it first.');
+                    return;
+                }
+                
+                panel.classList.add('active');
+                gameState[`${type}Open`] = true;
+                
+                if (type === 'camera') {
+                    openCameraView('CAM_01');
+                }
+            }
+        }
+        
+        function closePanel(type) {
+            document.getElementById(`${type}-panel`).classList.remove('active');
+            gameState[`${type}Open`] = false;
+            
+            if (type === 'camera') {
                 closeCameraView();
             }
         }
         
-        function toggleMaintenance() {
-            gameState.maintenanceOpen = !gameState.maintenanceOpen;
-            document.getElementById('maintenance-panel').classList.toggle('active');
+        function closeAllPanels() {
+            closePanel('camera');
+            closePanel('maintenance');
+            closePanel('audio');
         }
         
-        function toggleAudio() {
-            if (!gameState.audio) {
-                alert('Audio system is offline! Reboot it first.');
-                return;
-            }
-            gameState.audioOpen = !gameState.audioOpen;
-            document.getElementById('audio-panel').classList.toggle('active');
-        }
-        
-        function closeAudioPanel() {
-            gameState.audioOpen = false;
-            document.getElementById('audio-panel').classList.remove('active');
-        }
-        
-        // Camera functions
         function openCameraView(cam) {
             gameState.currentCamera = cam;
             document.getElementById('camera-view').classList.add('active');
             document.getElementById('current-cam-label').textContent = cam;
             
-            // Update camera content
-            const content = document.getElementById('camera-content');
-            if (!gameState.camera) {
-                content.innerHTML = '<div style="color: #f00;">SYSTEM ERROR</div>';
-            } else if (gameState.springtrapLocation === cam) {
-                content.innerHTML = '<div class="springtrap-indicator"></div><div style="margin-top: 10px;">SPRINGTRAP DETECTED</div>';
-            } else {
-                content.innerHTML = `<div style="color: #0f0;">Monitoring ${cam}</div>`;
+            // Show/hide Springtrap in camera room
+            Object.keys(springtrapModels).forEach(key => {
+                springtrapModels[key].visible = false;
+            });
+            
+            if (gameState.springtrapLocation === cam && gameState.camera) {
+                springtrapModels[cam].visible = true;
             }
             
             // Update active button
@@ -615,22 +899,21 @@
             });
         });
         
-        // Audio lure system
+        // ========== AUDIO LURE SYSTEM ==========
         document.querySelectorAll('.audio-button').forEach(btn => {
             btn.addEventListener('click', () => {
                 const targetCam = btn.dataset.cam;
                 if (targetCam && gameState.audio) {
                     console.log(`Playing audio at ${targetCam}`);
-                    // Move Springtrap towards audio
-                    if (Math.random() > 0.3) { // 70% chance to be attracted
+                    if (Math.random() > 0.3) {
                         moveSpringtrapTowards(targetCam);
                     }
-                    closeAudioPanel();
+                    closePanel('audio');
                 }
             });
         });
         
-        // Maintenance/Reboot system
+        // ========== MAINTENANCE SYSTEM ==========
         document.getElementById('reboot-vent').addEventListener('click', () => rebootSystem('ventilation'));
         document.getElementById('reboot-camera').addEventListener('click', () => rebootSystem('camera'));
         document.getElementById('reboot-audio').addEventListener('click', () => rebootSystem('audio'));
@@ -643,7 +926,6 @@
             btn.disabled = true;
             btn.textContent = 'REBOOTING...';
             
-            // Disable other buttons
             document.querySelectorAll('.maintenance-button').forEach(b => b.disabled = true);
             
             setTimeout(() => {
@@ -656,7 +938,6 @@
             }, 3000);
         }
         
-        // Update system status indicators
         function updateSystemStatus() {
             document.getElementById('vent-status').className = 
                 `status-indicator ${gameState.ventilation ? 'online' : 'offline'}`;
@@ -666,16 +947,15 @@
                 `status-indicator ${gameState.audio ? 'online' : 'offline'}`;
         }
         
-        // Springtrap AI
+        // ========== SPRINGTRAP AI ==========
         function moveSpringtrap() {
             if (gameState.gameOver) return;
             
             const possibleMoves = cameraMap[gameState.springtrapLocation] || [];
             
             if (possibleMoves.length > 0) {
-                // Bias towards office
                 let nextLocation;
-                if (possibleMoves.includes('OFFICE') && Math.random() > 0.4) {
+                if (possibleMoves.includes('OFFICE') && Math.random() > 0.5) {
                     nextLocation = 'OFFICE';
                 } else {
                     nextLocation = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
@@ -684,19 +964,15 @@
                 gameState.springtrapLocation = nextLocation;
                 document.getElementById('springtrap-location').textContent = nextLocation;
                 
-                // Check if reached office
                 if (nextLocation === 'OFFICE') {
-                    // Player has a chance to survive if they're viewing cameras
-                    if (!gameState.cameraOpen || Math.random() > 0.3) {
+                    if (!gameState.cameraOpen || Math.random() > 0.4) {
                         triggerJumpscare();
                     } else {
-                        // Escaped this time, move back
                         gameState.springtrapLocation = possibleMoves[0];
                     }
                 }
                 
-                // Update camera view if watching current location
-                if (gameState.cameraOpen && gameState.currentCamera === gameState.springtrapLocation) {
+                if (gameState.cameraOpen) {
                     openCameraView(gameState.currentCamera);
                 }
             }
@@ -710,7 +986,6 @@
             }
         }
         
-        // System failures
         function causeSystemFailure() {
             if (gameState.gameOver) return;
             
@@ -721,28 +996,44 @@
                 const failSystem = workingSystems[Math.floor(Math.random() * workingSystems.length)];
                 gameState[failSystem] = false;
                 updateSystemStatus();
-                console.log(`${failSystem} system failed!`);
                 
                 if (failSystem === 'camera' && gameState.cameraOpen) {
                     closeCameraView();
-                    gameState.cameraOpen = false;
-                    document.getElementById('camera-panel').classList.remove('active');
+                    closePanel('camera');
                 }
             }
         }
         
-        // Jumpscare
+        // ========== JUMPSCARE ==========
+        let jumpscareAnimation = 0;
         function triggerJumpscare() {
             gameState.gameOver = true;
+            closeAllPanels();
             document.getElementById('jumpscare').style.display = 'flex';
             
-            setTimeout(() => {
-                document.getElementById('jumpscare').style.display = 'none';
-                document.getElementById('game-over').style.display = 'flex';
-            }, 2000);
+            jumpscareAnimation = 0;
+            const jumpscareInterval = setInterval(() => {
+                jumpscareAnimation += 0.1;
+                jumpscareSpringtrap.position.z = -2 + jumpscareAnimation * 3;
+                jumpscareSpringtrap.rotation.y = Math.sin(jumpscareAnimation * 10) * 0.3;
+                jumpscareRenderer.render(jumpscareScene, jumpscareCamera);
+                
+                if (jumpscareAnimation > 1) {
+                    clearInterval(jumpscareInterval);
+                    setTimeout(() => {
+                        document.getElementById('jumpscare').style.display = 'none';
+                        document.getElementById('game-over').style.display = 'flex';
+                    }, 500);
+                }
+            }, 50);
         }
         
-        // Win condition
+        // ========== TIME & WIN ==========
+        function updateTime() {
+            const hours = ['12 AM', '1 AM', '2 AM', '3 AM', '4 AM', '5 AM', '6 AM'];
+            document.getElementById('time').textContent = hours[gameState.time];
+        }
+        
         function checkWin() {
             if (gameState.time >= 6 && !gameState.gameOver) {
                 gameState.won = true;
@@ -750,54 +1041,76 @@
             }
         }
         
-        // Time progression
-        function updateTime() {
-            const hours = ['12 AM', '1 AM', '2 AM', '3 AM', '4 AM', '5 AM', '6 AM'];
-            document.getElementById('time').textContent = hours[gameState.time];
-        }
-        
-        // Main game loop
+        // ========== GAME LOOP ==========
         function gameLoop() {
             if (gameState.gameOver || gameState.won) return;
             
-            // Time progression (each hour = 60 seconds in real time)
             gameState.ventFailTimer++;
             gameState.springtrapMoveTimer++;
             
-            // Springtrap moves every 10-15 seconds
-            if (gameState.springtrapMoveTimer > 1000 + Math.random() * 500) {
+            if (gameState.springtrapMoveTimer > 800 + Math.random() * 400) {
                 moveSpringtrap();
                 gameState.springtrapMoveTimer = 0;
             }
             
-            // System failures every 20-30 seconds
-            if (gameState.ventFailTimer > 2000 + Math.random() * 1000) {
+            if (gameState.ventFailTimer > 1500 + Math.random() * 800) {
                 causeSystemFailure();
                 gameState.ventFailTimer = 0;
             }
-            
-            // Update time every 60 seconds
-            if (performance.now() % 60000 < 100) {
-                if (gameState.time < 6) {
-                    gameState.time++;
-                    updateTime();
-                }
-                checkWin();
-            }
         }
         
-        // Initialize game
-        updateTime();
-        updateSystemStatus();
-        
-        // Game loop
-        setInterval(gameLoop, 100);
-        
-        // Auto-advance time for testing (remove in production)
+        // Time progression
         setInterval(() => {
             if (!gameState.gameOver && !gameState.won && gameState.time < 6) {
                 gameState.time++;
                 updateTime();
                 checkWin();
             }
-        }, 45000); // Each hour = 45
+        }, 50000); // 50 seconds per hour
+        
+        // ========== RENDER LOOPS ==========
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            if (!gameState.gameOver && !gameState.won) {
+                gameLoop();
+                
+                // Office camera rotation
+                currentRotation += (targetRotation - currentRotation) * 0.05;
+                officeCamera.rotation.y = currentRotation;
+                
+                officeRenderer.render(officeScene, officeCamera);
+                
+                // Render camera view if open
+                if (gameState.cameraOpen && gameState.camera) {
+                    const currentRoom = cameraRooms[gameState.currentCamera];
+                    if (currentRoom) {
+                        cameraRenderer.render(currentRoom, cameraViewCamera);
+                    }
+                }
+            }
+        }
+        
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            officeCamera.aspect = window.innerWidth / window.innerHeight;
+            officeCamera.updateProjectionMatrix();
+            officeRenderer.setSize(window.innerWidth, window.innerHeight);
+        });
+        
+        // Start game
+        updateTime();
+        updateSystemStatus();
+        animate();
+        
+        console.log('%cFNAF 3 Full 3D Game Loaded', 'color: #0f0; font-size: 18px; font-weight: bold;');
+        console.log('%cControls:', 'color: #0f0;');
+        console.log('- Mouse: Look around office');
+        console.log('- CAMERAS: View 3D camera rooms');
+        console.log('- MAINTENANCE: Reboot systems');
+        console.log('- AUDIO: Lure Springtrap');
+        console.log('- ESC or X buttons: Close panels');
+        console.log('%cSurvive until 6 AM!', 'color: #ff0;');
+    </script>
+</body>
+</html>

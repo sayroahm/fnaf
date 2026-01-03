@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FNAF Camera System</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #000;
+            font-family: 'Courier New', monospace;
+        }
+        
+        #container {
+            width: 100vw;
+            height: 100vh;
+            cursor: none;
+        }
+        
+        #crosshair {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            transition: border-color 0.2s;
+        }
+        
+        #info {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            color: #0f0;
+            font-size: 14px;
+            z-index: 100;
+            text-shadow: 0 0 10px #0f0;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border: 1px solid #0f0;
+        }
+        
+        .static-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.03;
+            z-index: 999;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(255, 255, 255, 0.1) 2px,
+                rgba(255, 255, 255, 0.1) 4px
+            );
+            animation: scanlines 0.1s linear infinite;
+        }
+        
+        @keyframes scanlines {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(4px); }
+        }
+    </style>
+</head>
+<body>
+    <div id="container"></div>
+    <div id="crosshair"></div>
+    <div class="static-overlay"></div>
+    <div id="info">
+        CAM_01 - OFFICE<br>
+        FPS: <span id="fps">0</span><br>
+        ROTATION: <span id="rotation">0°</span>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // Scene setup
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.getElementById('container').appendChild(renderer.domElement);
+
+        // Camera positioning
+        camera.position.set(0, 0, 0);
+        
+        // Mouse tracking
+        let mouseX = 0;
+        let targetRotation = 0;
+        let currentRotation = 0;
+        const maxRotation = Math.PI / 3; // 60 degrees max rotation left/right
+        const rotationSpeed = 0.05;
+        
+        // Create a cylindrical room/panorama
+        // For now, we'll use a placeholder texture - you'll replace this with your office image
+        const geometry = new THREE.CylinderGeometry(5, 5, 4, 32, 1, true);
+        
+        // Create a simple gradient texture as placeholder
+        const canvas = document.createElement('canvas');
+        canvas.width = 2048;
+        canvas.height = 512;
+        const ctx = canvas.getContext('2d');
+        
+        // Draw a simple office-like background
+        const gradient = ctx.createLinearGradient(0, 0, 0, 512);
+        gradient.addColorStop(0, '#1a1a2e');
+        gradient.addColorStop(0.7, '#16213e');
+        gradient.addColorStop(1, '#0f0f1e');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, 2048, 512);
+        
+        // Add some vertical lines to simulate walls/doors
+        ctx.strokeStyle = '#333';
+        ctx.lineWidth = 4;
+        for (let i = 0; i < 2048; i += 256) {
+            ctx.beginPath();
+            ctx.moveTo(i, 0);
+            ctx.lineTo(i, 512);
+            ctx.stroke();
+        }
+        
+        // Add some rectangles to simulate doors/windows
+        ctx.fillStyle = '#0a0a15';
+        ctx.fillRect(400, 150, 200, 300);
+        ctx.fillRect(1200, 150, 200, 300);
+        
+        ctx.strokeStyle = '#555';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(400, 150, 200, 300);
+        ctx.strokeRect(1200, 150, 200, 300);
+        
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.repeat.x = -1; // Flip texture horizontally
+        
+        const material = new THREE.MeshBasicMaterial({ 
+            map: texture, 
+            side: THREE.BackSide 
+        });
+        
+        const room = new THREE.Mesh(geometry, material);
+        scene.add(room);
+        
+        // Add some ambient lighting effect
+        scene.fog = new THREE.Fog(0x000000, 1, 8);
+        
+        // Mouse move handler
+        document.addEventListener('mousemove', (e) => {
+            // Normalize mouse position (-1 to 1)
+            mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+            // Inverted: negative mouseX means camera rotates in same direction as cursor
+            targetRotation = -mouseX * maxRotation;
+            
+            // Update crosshair position
+            const crosshair = document.getElementById('crosshair');
+            crosshair.style.left = e.clientX + 'px';
+            crosshair.style.top = e.clientY + 'px';
+        });
+        
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+        
+        // FPS counter
+        let lastTime = performance.now();
+        let frames = 0;
+        
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Smooth camera rotation with lerp
+            currentRotation += (targetRotation - currentRotation) * rotationSpeed;
+            camera.rotation.y = currentRotation;
+            
+            // Update info display
+            const degrees = Math.round((currentRotation * 180 / Math.PI) * 10) / 10;
+            document.getElementById('rotation').textContent = degrees + '°';
+            
+            // FPS counter
+            frames++;
+            const currentTime = performance.now();
+            if (currentTime >= lastTime + 1000) {
+                document.getElementById('fps').textContent = frames;
+                frames = 0;
+                lastTime = currentTime;
+            }
+            
+            renderer.render(scene, camera);
+        }
+        
+        animate();
+        
+        // Instructions log
+        console.log('%cFNAF Camera System Ready', 'color: #0f0; font-size: 16px; font-weight: bold;');
+        console.log('%cMove your mouse left/right to pan the camera', 'color: #0f0;');
+        console.log('%cNext steps: Replace texture with your office image, add 3D models/doors', 'color: #ff0;');
+    </script>
+</body>
+</html>

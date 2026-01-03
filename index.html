@@ -3,44 +3,283 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FNAF Camera System</title>
+    <title>Five Nights at Freddy's 3 - Fan Game</title>
     <style>
-        body {
+        * {
             margin: 0;
-            overflow: hidden;
-            background: #000;
-            font-family: 'Courier New', monospace;
+            padding: 0;
+            box-sizing: border-box;
         }
         
-        #container {
-            width: 100vw;
-            height: 100vh;
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            color: #0f0;
+            overflow: hidden;
             cursor: none;
         }
         
-        #crosshair {
-            position: fixed;
-            width: 20px;
-            height: 20px;
-            border: 2px solid rgba(255, 255, 255, 0.5);
-            border-radius: 50%;
-            pointer-events: none;
-            transform: translate(-50%, -50%);
-            z-index: 1000;
-            transition: border-color 0.2s;
+        #game-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
         }
         
-        #info {
+        #office-view {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #1a1a2e 0%, #0f0f1e 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .office-wall {
+            position: absolute;
+            bottom: 0;
+            width: 300%;
+            height: 100%;
+            background: linear-gradient(180deg, #2a2a3e 0%, #1a1a2e 50%, #0a0a1e 100%);
+            left: 50%;
+            transform: translateX(-50%);
+            transition: transform 0.1s linear;
+        }
+        
+        .vent {
+            position: absolute;
+            width: 150px;
+            height: 100px;
+            background: #000;
+            border: 3px solid #333;
+            border-radius: 5px;
+        }
+        
+        .vent.left {
+            left: 15%;
+            top: 40%;
+        }
+        
+        .vent.right {
+            right: 15%;
+            top: 40%;
+        }
+        
+        #hud {
             position: fixed;
             top: 20px;
             left: 20px;
-            color: #0f0;
-            font-size: 14px;
             z-index: 100;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border: 2px solid #0f0;
+            font-size: 14px;
+        }
+        
+        #time {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #fff;
             text-shadow: 0 0 10px #0f0;
-            background: rgba(0, 0, 0, 0.7);
+        }
+        
+        .system-status {
+            margin: 5px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        
+        .status-indicator.online {
+            background: #0f0;
+            box-shadow: 0 0 10px #0f0;
+        }
+        
+        .status-indicator.offline {
+            background: #f00;
+            box-shadow: 0 0 10px #f00;
+        }
+        
+        #camera-panel {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #0f0;
+            padding: 15px;
+            display: none;
+            z-index: 150;
+        }
+        
+        #camera-panel.active {
+            display: block;
+        }
+        
+        .camera-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .camera-button {
+            background: #1a1a2e;
+            border: 2px solid #0f0;
+            color: #0f0;
             padding: 10px;
-            border: 1px solid #0f0;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .camera-button:hover {
+            background: #0f0;
+            color: #000;
+            box-shadow: 0 0 15px #0f0;
+        }
+        
+        .camera-button.active {
+            background: #0f0;
+            color: #000;
+        }
+        
+        #camera-view {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: none;
+            z-index: 200;
+        }
+        
+        #camera-view.active {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .camera-feed {
+            width: 80%;
+            height: 70%;
+            background: linear-gradient(180deg, #1a1a2e 0%, #0f0f1e 100%);
+            border: 3px solid #0f0;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+        }
+        
+        .camera-label {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 18px;
+            color: #0f0;
+            text-shadow: 0 0 10px #0f0;
+        }
+        
+        #maintenance-panel {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #f90;
+            padding: 15px;
+            z-index: 150;
+            display: none;
+        }
+        
+        #maintenance-panel.active {
+            display: block;
+        }
+        
+        .maintenance-button {
+            background: #1a1a2e;
+            border: 2px solid #f90;
+            color: #f90;
+            padding: 10px 15px;
+            margin: 5px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            transition: all 0.2s;
+        }
+        
+        .maintenance-button:hover:not(:disabled) {
+            background: #f90;
+            color: #000;
+            box-shadow: 0 0 15px #f90;
+        }
+        
+        .maintenance-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        #audio-panel {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            border: 2px solid #0ff;
+            padding: 20px;
+            display: none;
+            z-index: 250;
+        }
+        
+        #audio-panel.active {
+            display: block;
+        }
+        
+        .audio-button {
+            background: #1a1a2e;
+            border: 2px solid #0ff;
+            color: #0ff;
+            padding: 15px;
+            margin: 10px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .audio-button:hover {
+            background: #0ff;
+            color: #000;
+        }
+        
+        #toggle-buttons {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            z-index: 100;
+        }
+        
+        .toggle-btn {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #0f0;
+            color: #0f0;
+            padding: 15px 30px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+        
+        .toggle-btn:hover {
+            background: #0f0;
+            color: #000;
+            box-shadow: 0 0 20px #0f0;
         }
         
         .static-overlay {
@@ -66,144 +305,499 @@
             0% { transform: translateY(0); }
             100% { transform: translateY(4px); }
         }
+        
+        #crosshair {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(0, 255, 0, 0.5);
+            border-radius: 50%;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+        }
+        
+        #jumpscare {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            font-size: 72px;
+            color: #f00;
+            text-shadow: 0 0 30px #f00;
+            animation: shake 0.1s infinite;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(-10px, 10px) rotate(-5deg); }
+            50% { transform: translate(10px, -10px) rotate(5deg); }
+            75% { transform: translate(-10px, -10px) rotate(-5deg); }
+        }
+        
+        #game-over, #victory {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+        
+        #game-over h1 {
+            color: #f00;
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+        
+        #victory h1 {
+            color: #0f0;
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+        
+        .restart-btn {
+            background: #1a1a2e;
+            border: 2px solid #0f0;
+            color: #0f0;
+            padding: 20px 40px;
+            font-size: 24px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            margin-top: 20px;
+        }
+        
+        .restart-btn:hover {
+            background: #0f0;
+            color: #000;
+        }
+        
+        .springtrap-indicator {
+            width: 30px;
+            height: 30px;
+            background: #f00;
+            border-radius: 50%;
+            box-shadow: 0 0 20px #f00;
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
     </style>
 </head>
 <body>
-    <div id="container"></div>
-    <div id="crosshair"></div>
-    <div class="static-overlay"></div>
-    <div id="info">
-        CAM_01 - OFFICE<br>
-        FPS: <span id="fps">0</span><br>
-        ROTATION: <span id="rotation">0°</span>
+    <div id="game-container">
+        <div id="office-view">
+            <div class="office-wall" id="office-wall">
+                <div class="vent left"></div>
+                <div class="vent right"></div>
+            </div>
+        </div>
+        
+        <div id="hud">
+            <div id="time">12 AM</div>
+            <div class="system-status">
+                <span class="status-indicator online" id="vent-status"></span>
+                <span>VENTILATION</span>
+            </div>
+            <div class="system-status">
+                <span class="status-indicator online" id="camera-status"></span>
+                <span>CAMERA SYSTEM</span>
+            </div>
+            <div class="system-status">
+                <span class="status-indicator online" id="audio-status"></span>
+                <span>AUDIO DEVICES</span>
+            </div>
+            <div style="margin-top: 10px;">
+                <div>SPRINGTRAP: <span id="springtrap-location">CAM 01</span></span>
+            </div>
+        </div>
+        
+        <div id="camera-panel">
+            <h3 style="color: #0f0; margin-bottom: 10px;">CAMERA SYSTEM</h3>
+            <div class="camera-grid">
+                <button class="camera-button" data-cam="CAM_01">CAM 01</button>
+                <button class="camera-button" data-cam="CAM_02">CAM 02</button>
+                <button class="camera-button" data-cam="CAM_03">CAM 03</button>
+                <button class="camera-button" data-cam="CAM_04">CAM 04</button>
+                <button class="camera-button" data-cam="CAM_05">CAM 05</button>
+                <button class="camera-button" data-cam="CAM_06">CAM 06</button>
+                <button class="camera-button" data-cam="CAM_07">CAM 07</button>
+                <button class="camera-button" data-cam="CAM_08">CAM 08</button>
+                <button class="camera-button" data-cam="CAM_09">CAM 09</button>
+            </div>
+        </div>
+        
+        <div id="maintenance-panel">
+            <h3 style="color: #f90; margin-bottom: 10px;">MAINTENANCE</h3>
+            <p style="color: #f90; font-size: 12px; margin-bottom: 10px;">Only one system can reboot at a time</p>
+            <button class="maintenance-button" id="reboot-vent">REBOOT VENTILATION</button>
+            <button class="maintenance-button" id="reboot-camera">REBOOT CAMERA</button>
+            <button class="maintenance-button" id="reboot-audio">REBOOT AUDIO</button>
+        </div>
+        
+        <div id="audio-panel">
+            <h3 style="color: #0ff; margin-bottom: 10px;">AUDIO LURE</h3>
+            <p style="color: #0ff; font-size: 12px; margin-bottom: 10px;">Play audio to lure Springtrap</p>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                <button class="audio-button" data-cam="CAM_01">CAM 01</button>
+                <button class="audio-button" data-cam="CAM_02">CAM 02</button>
+                <button class="audio-button" data-cam="CAM_03">CAM 03</button>
+                <button class="audio-button" data-cam="CAM_04">CAM 04</button>
+                <button class="audio-button" data-cam="CAM_05">CAM 05</button>
+                <button class="audio-button" data-cam="CAM_06">CAM 06</button>
+                <button class="audio-button" data-cam="CAM_07">CAM 07</button>
+                <button class="audio-button" data-cam="CAM_08">CAM 08</button>
+                <button class="audio-button" data-cam="CAM_09">CAM 09</button>
+            </div>
+            <button class="audio-button" style="margin-top: 10px; width: 100%;" onclick="closeAudioPanel()">CLOSE</button>
+        </div>
+        
+        <div id="camera-view">
+            <div class="camera-feed">
+                <div class="camera-label" id="current-cam-label">CAM 01</div>
+                <div id="camera-content">No signal...</div>
+            </div>
+        </div>
+        
+        <div id="toggle-buttons">
+            <button class="toggle-btn" onclick="toggleCameras()">CAMERAS</button>
+            <button class="toggle-btn" onclick="toggleMaintenance()">MAINTENANCE</button>
+            <button class="toggle-btn" onclick="toggleAudio()">AUDIO</button>
+        </div>
+        
+        <div id="jumpscare">
+            <div>SPRINGTRAP</div>
+        </div>
+        
+        <div id="game-over">
+            <h1>GAME OVER</h1>
+            <p style="font-size: 24px; color: #fff;">You failed to survive the night...</p>
+            <button class="restart-btn" onclick="location.reload()">RESTART</button>
+        </div>
+        
+        <div id="victory">
+            <h1>6 AM</h1>
+            <p style="font-size: 24px; color: #fff;">You survived the night!</p>
+            <button class="restart-btn" onclick="location.reload()">PLAY AGAIN</button>
+        </div>
+        
+        <div class="static-overlay"></div>
+        <div id="crosshair"></div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
-        // Scene setup
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.getElementById('container').appendChild(renderer.domElement);
-
-        // Camera positioning
-        camera.position.set(0, 0, 0);
+        // Game State
+        let gameState = {
+            time: 0, // 0 = 12AM, 6 = 6AM
+            ventilation: true,
+            camera: true,
+            audio: true,
+            springtrapLocation: 'CAM_01',
+            currentCamera: 'CAM_01',
+            cameraOpen: false,
+            maintenanceOpen: false,
+            audioOpen: false,
+            rebooting: null,
+            gameOver: false,
+            won: false,
+            ventFailTimer: 0,
+            springtrapMoveTimer: 0,
+            officeWallOffset: 0
+        };
         
-        // Mouse tracking
-        let mouseX = 0;
-        let targetRotation = 0;
-        let currentRotation = 0;
-        const maxRotation = Math.PI / 3; // 60 degrees max rotation left/right
-        const rotationSpeed = 0.05;
+        // Camera locations map (adjacency for pathfinding)
+        const cameraMap = {
+            'CAM_01': ['CAM_02', 'CAM_04'],
+            'CAM_02': ['CAM_01', 'CAM_03', 'CAM_05'],
+            'CAM_03': ['CAM_02', 'CAM_06'],
+            'CAM_04': ['CAM_01', 'CAM_05', 'CAM_07'],
+            'CAM_05': ['CAM_02', 'CAM_04', 'CAM_06', 'CAM_08'],
+            'CAM_06': ['CAM_03', 'CAM_05', 'CAM_09'],
+            'CAM_07': ['CAM_04', 'CAM_08', 'OFFICE'],
+            'CAM_08': ['CAM_05', 'CAM_07', 'CAM_09', 'OFFICE'],
+            'CAM_09': ['CAM_06', 'CAM_08', 'OFFICE'],
+            'OFFICE': ['CAM_07', 'CAM_08', 'CAM_09']
+        };
         
-        // Create a cylindrical room/panorama
-        // For now, we'll use a placeholder texture - you'll replace this with your office image
-        const geometry = new THREE.CylinderGeometry(5, 5, 4, 32, 1, true);
-        
-        // Create a simple gradient texture as placeholder
-        const canvas = document.createElement('canvas');
-        canvas.width = 2048;
-        canvas.height = 512;
-        const ctx = canvas.getContext('2d');
-        
-        // Draw a simple office-like background
-        const gradient = ctx.createLinearGradient(0, 0, 0, 512);
-        gradient.addColorStop(0, '#1a1a2e');
-        gradient.addColorStop(0.7, '#16213e');
-        gradient.addColorStop(1, '#0f0f1e');
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, 2048, 512);
-        
-        // Add some vertical lines to simulate walls/doors
-        ctx.strokeStyle = '#333';
-        ctx.lineWidth = 4;
-        for (let i = 0; i < 2048; i += 256) {
-            ctx.beginPath();
-            ctx.moveTo(i, 0);
-            ctx.lineTo(i, 512);
-            ctx.stroke();
-        }
-        
-        // Add some rectangles to simulate doors/windows
-        ctx.fillStyle = '#0a0a15';
-        ctx.fillRect(400, 150, 200, 300);
-        ctx.fillRect(1200, 150, 200, 300);
-        
-        ctx.strokeStyle = '#555';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(400, 150, 200, 300);
-        ctx.strokeRect(1200, 150, 200, 300);
-        
-        const texture = new THREE.CanvasTexture(canvas);
-        texture.wrapS = THREE.RepeatWrapping;
-        texture.repeat.x = -1; // Flip texture horizontally
-        
-        const material = new THREE.MeshBasicMaterial({ 
-            map: texture, 
-            side: THREE.BackSide 
-        });
-        
-        const room = new THREE.Mesh(geometry, material);
-        scene.add(room);
-        
-        // Add some ambient lighting effect
-        scene.fog = new THREE.Fog(0x000000, 1, 8);
-        
-        // Mouse move handler
+        // Mouse tracking for office view
         document.addEventListener('mousemove', (e) => {
-            // Normalize mouse position (-1 to 1)
-            mouseX = (e.clientX / window.innerWidth) * 2 - 1;
-            // Inverted: negative mouseX means camera rotates in same direction as cursor
-            targetRotation = -mouseX * maxRotation;
-            
-            // Update crosshair position
             const crosshair = document.getElementById('crosshair');
             crosshair.style.left = e.clientX + 'px';
             crosshair.style.top = e.clientY + 'px';
-        });
-        
-        // Handle window resize
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-        
-        // FPS counter
-        let lastTime = performance.now();
-        let frames = 0;
-        
-        // Animation loop
-        function animate() {
-            requestAnimationFrame(animate);
             
-            // Smooth camera rotation with lerp
-            currentRotation += (targetRotation - currentRotation) * rotationSpeed;
-            camera.rotation.y = currentRotation;
-            
-            // Update info display
-            const degrees = Math.round((currentRotation * 180 / Math.PI) * 10) / 10;
-            document.getElementById('rotation').textContent = degrees + '°';
-            
-            // FPS counter
-            frames++;
-            const currentTime = performance.now();
-            if (currentTime >= lastTime + 1000) {
-                document.getElementById('fps').textContent = frames;
-                frames = 0;
-                lastTime = currentTime;
+            if (!gameState.cameraOpen && !gameState.gameOver) {
+                const mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+                gameState.officeWallOffset = -mouseX * 30;
+                document.getElementById('office-wall').style.transform = 
+                    `translateX(calc(-50% + ${gameState.officeWallOffset}%))`;
             }
-            
-            renderer.render(scene, camera);
+        });
+        
+        // Toggle functions
+        function toggleCameras() {
+            gameState.cameraOpen = !gameState.cameraOpen;
+            document.getElementById('camera-panel').classList.toggle('active');
+            if (gameState.cameraOpen) {
+                openCameraView('CAM_01');
+            } else {
+                closeCameraView();
+            }
         }
         
-        animate();
+        function toggleMaintenance() {
+            gameState.maintenanceOpen = !gameState.maintenanceOpen;
+            document.getElementById('maintenance-panel').classList.toggle('active');
+        }
         
-        // Instructions log
-        console.log('%cFNAF Camera System Ready', 'color: #0f0; font-size: 16px; font-weight: bold;');
-        console.log('%cMove your mouse left/right to pan the camera', 'color: #0f0;');
-        console.log('%cNext steps: Replace texture with your office image, add 3D models/doors', 'color: #ff0;');
-    </script>
-</body>
-</html>
+        function toggleAudio() {
+            if (!gameState.audio) {
+                alert('Audio system is offline! Reboot it first.');
+                return;
+            }
+            gameState.audioOpen = !gameState.audioOpen;
+            document.getElementById('audio-panel').classList.toggle('active');
+        }
+        
+        function closeAudioPanel() {
+            gameState.audioOpen = false;
+            document.getElementById('audio-panel').classList.remove('active');
+        }
+        
+        // Camera functions
+        function openCameraView(cam) {
+            gameState.currentCamera = cam;
+            document.getElementById('camera-view').classList.add('active');
+            document.getElementById('current-cam-label').textContent = cam;
+            
+            // Update camera content
+            const content = document.getElementById('camera-content');
+            if (!gameState.camera) {
+                content.innerHTML = '<div style="color: #f00;">SYSTEM ERROR</div>';
+            } else if (gameState.springtrapLocation === cam) {
+                content.innerHTML = '<div class="springtrap-indicator"></div><div style="margin-top: 10px;">SPRINGTRAP DETECTED</div>';
+            } else {
+                content.innerHTML = `<div style="color: #0f0;">Monitoring ${cam}</div>`;
+            }
+            
+            // Update active button
+            document.querySelectorAll('.camera-button').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.cam === cam) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+        
+        function closeCameraView() {
+            document.getElementById('camera-view').classList.remove('active');
+        }
+        
+        // Camera button clicks
+        document.querySelectorAll('.camera-button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (gameState.camera) {
+                    openCameraView(btn.dataset.cam);
+                }
+            });
+        });
+        
+        // Audio lure system
+        document.querySelectorAll('.audio-button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetCam = btn.dataset.cam;
+                if (targetCam && gameState.audio) {
+                    console.log(`Playing audio at ${targetCam}`);
+                    // Move Springtrap towards audio
+                    if (Math.random() > 0.3) { // 70% chance to be attracted
+                        moveSpringtrapTowards(targetCam);
+                    }
+                    closeAudioPanel();
+                }
+            });
+        });
+        
+        // Maintenance/Reboot system
+        document.getElementById('reboot-vent').addEventListener('click', () => rebootSystem('ventilation'));
+        document.getElementById('reboot-camera').addEventListener('click', () => rebootSystem('camera'));
+        document.getElementById('reboot-audio').addEventListener('click', () => rebootSystem('audio'));
+        
+        function rebootSystem(system) {
+            if (gameState.rebooting) return;
+            
+            gameState.rebooting = system;
+            const btn = document.getElementById(`reboot-${system}`);
+            btn.disabled = true;
+            btn.textContent = 'REBOOTING...';
+            
+            // Disable other buttons
+            document.querySelectorAll('.maintenance-button').forEach(b => b.disabled = true);
+            
+            setTimeout(() => {
+                gameState[system] = true;
+                gameState.rebooting = null;
+                btn.disabled = false;
+                btn.textContent = `REBOOT ${system.toUpperCase()}`;
+                document.querySelectorAll('.maintenance-button').forEach(b => b.disabled = false);
+                updateSystemStatus();
+            }, 3000);
+        }
+        
+        // Update system status indicators
+        function updateSystemStatus() {
+            document.getElementById('vent-status').className = 
+                `status-indicator ${gameState.ventilation ? 'online' : 'offline'}`;
+            document.getElementById('camera-status').className = 
+                `status-indicator ${gameState.camera ? 'online' : 'offline'}`;
+            document.getElementById('audio-status').className = 
+                `status-indicator ${gameState.audio ? 'online' : 'offline'}`;
+        }
+        
+        // Springtrap AI
+        function moveSpringtrap() {
+            if (gameState.gameOver) return;
+            
+            const possibleMoves = cameraMap[gameState.springtrapLocation] || [];
+            
+            if (possibleMoves.length > 0) {
+                // Bias towards office
+                let nextLocation;
+                if (possibleMoves.includes('OFFICE') && Math.random() > 0.4) {
+                    nextLocation = 'OFFICE';
+                } else {
+                    nextLocation = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
+                }
+                
+                gameState.springtrapLocation = nextLocation;
+                document.getElementById('springtrap-location').textContent = nextLocation;
+                
+                // Check if reached office
+                if (nextLocation === 'OFFICE') {
+                    // Player has a chance to survive if they're viewing cameras
+                    if (!gameState.cameraOpen || Math.random() > 0.3) {
+                        triggerJumpscare();
+                    } else {
+                        // Escaped this time, move back
+                        gameState.springtrapLocation = possibleMoves[0];
+                    }
+                }
+                
+                // Update camera view if watching current location
+                if (gameState.cameraOpen && gameState.currentCamera === gameState.springtrapLocation) {
+                    openCameraView(gameState.currentCamera);
+                }
+            }
+        }
+        
+        function moveSpringtrapTowards(targetCam) {
+            const possibleMoves = cameraMap[gameState.springtrapLocation] || [];
+            if (possibleMoves.includes(targetCam)) {
+                gameState.springtrapLocation = targetCam;
+                document.getElementById('springtrap-location').textContent = targetCam;
+            }
+        }
+        
+        // System failures
+        function causeSystemFailure() {
+            if (gameState.gameOver) return;
+            
+            const systems = ['ventilation', 'camera', 'audio'];
+            const workingSystems = systems.filter(s => gameState[s]);
+            
+            if (workingSystems.length > 0) {
+                const failSystem = workingSystems[Math.floor(Math.random() * workingSystems.length)];
+                gameState[failSystem] = false;
+                updateSystemStatus();
+                console.log(`${failSystem} system failed!`);
+                
+                if (failSystem === 'camera' && gameState.cameraOpen) {
+                    closeCameraView();
+                    gameState.cameraOpen = false;
+                    document.getElementById('camera-panel').classList.remove('active');
+                }
+            }
+        }
+        
+        // Jumpscare
+        function triggerJumpscare() {
+            gameState.gameOver = true;
+            document.getElementById('jumpscare').style.display = 'flex';
+            
+            setTimeout(() => {
+                document.getElementById('jumpscare').style.display = 'none';
+                document.getElementById('game-over').style.display = 'flex';
+            }, 2000);
+        }
+        
+        // Win condition
+        function checkWin() {
+            if (gameState.time >= 6 && !gameState.gameOver) {
+                gameState.won = true;
+                document.getElementById('victory').style.display = 'flex';
+            }
+        }
+        
+        // Time progression
+        function updateTime() {
+            const hours = ['12 AM', '1 AM', '2 AM', '3 AM', '4 AM', '5 AM', '6 AM'];
+            document.getElementById('time').textContent = hours[gameState.time];
+        }
+        
+        // Main game loop
+        function gameLoop() {
+            if (gameState.gameOver || gameState.won) return;
+            
+            // Time progression (each hour = 60 seconds in real time)
+            gameState.ventFailTimer++;
+            gameState.springtrapMoveTimer++;
+            
+            // Springtrap moves every 10-15 seconds
+            if (gameState.springtrapMoveTimer > 1000 + Math.random() * 500) {
+                moveSpringtrap();
+                gameState.springtrapMoveTimer = 0;
+            }
+            
+            // System failures every 20-30 seconds
+            if (gameState.ventFailTimer > 2000 + Math.random() * 1000) {
+                causeSystemFailure();
+                gameState.ventFailTimer = 0;
+            }
+            
+            // Update time every 60 seconds
+            if (performance.now() % 60000 < 100) {
+                if (gameState.time < 6) {
+                    gameState.time++;
+                    updateTime();
+                }
+                checkWin();
+            }
+        }
+        
+        // Initialize game
+        updateTime();
+        updateSystemStatus();
+        
+        // Game loop
+        setInterval(gameLoop, 100);
+        
+        // Auto-advance time for testing (remove in production)
+        setInterval(() => {
+            if (!gameState.gameOver && !gameState.won && gameState.time < 6) {
+                gameState.time++;
+                updateTime();
+                checkWin();
+            }
+        }, 45000); // Each hour = 45
